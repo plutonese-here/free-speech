@@ -14,39 +14,38 @@ let sessionVotes = JSON.parse(localStorage.getItem('sessionVotes')) || {};
 const adjectives = ["Witty", "Silly", "Clever", "Brave", "Curious", "Dapper", "Eager", "Funky", "Giga", "Happy", "Jolly", "Lazy", "Mega", "Nifty", "Omega", "Pixel", "Quantum", "Retro", "Super", "Turbo", "Ultra", "Vivid", "Wild", "Zen"];
 const nouns = ["Cat", "Dog", "Wombat", "Fox", "Panda", "Penguin", "Dingo", "Gopher", "Koala", "Lemur", "Narwhal", "Ocelot", "Quokka", "Raccoon", "Sloth", "Tarsier", "Unicorn", "Vulture", "Walrus", "Yak", "Zebra"];
 const animalIcons = [
-    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>', // Panda
-    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.79 13.5l-1.79-1.79c.35-.58.58-1.25.58-2.02 0-2.21-1.79-4-4-4s-4 1.79-4 4c0 .77.23 1.44.58 2.02L6.42 15.5C4.9 14.28 4 12.24 4 10c0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.9 4.28-2.42 5.5zM12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>', // Dog
-    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 7h-7L12 5.5l3.5 3.5zM12 17.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 8.5 12 8.5s4.5 2.01 4.5 4.5S14.49 17.5 12 17.5z"/></svg>', // Cat
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.79 13.5l-1.79-1.79c.35-.58.58-1.25.58-2.02 0-2.21-1.79-4-4-4s-4 1.79-4 4c0 .77.23 1.44.58 2.02L6.42 15.5C4.9 14.28 4 12.24 4 10c0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.9 4.28-2.42 5.5zM12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 7h-7L12 5.5l3.5 3.5zM12 17.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 8.5 12 8.5s4.5 2.01 4.5 4.5S14.49 17.5 12 17.5z"/></svg>',
 ];
 const categories = [ {id: 'all', name: 'All Posts'}, {id: 'jp', name: 'Japanese Culture'}, {id: 'a', name: 'Anime & Manga'}, {id: 'c', name: 'Cosplay'}, {id: 'tr', name: 'Transportation'}, {id: 'oc', name: 'Otaku Culture'}, {id: 'yt', name: 'YouTubers'}, {id: 'vg', name: 'Video Games'}, {id: 'vr', name: 'Retro Games'}, {id: 'int', name: 'Interests'}, {id: 'co', name: 'Comics & Cartoons'}, {id: 'g', name: 'Technology'}, {id: 'tv', name: 'Television & Film'}, {id: 'k', name: 'Weapons'}, {id: 'o', name: 'Auto'}, {id: 'an', name: 'Animals & Nature'}, {id: 'tg', name: 'Traditional Games'}, {id: 'sp', name: 'Sports'}, {id: 'xs', name: 'Extreme Sports'}, {id: 'pw', name: 'Professional Wrestling'}, {id: 'sci', name: 'Science & Math'}, {id: 'his', name: 'History & Humanities'}, {id: 'int', name: 'International'}, {id: 'out', name: 'Outdoors'}, {id: 'toy', 'name': 'Toys'}, {id: 'cr', name: 'Creative'}, {id: 'i', name: 'Oekaki'}, {id: 'po', name: 'Papercraft & Origami'}, {id: 'p', name: 'Photography'}, {id: 'ck', name: 'Food & Cooking'}, {id: 'ac', name: 'Artwork/Critique'}, {id: 'w', name: 'Wallpapers'}, {id: 'lit', name: 'Literature'}, {id: 'mu', name: 'Music'}, {id: 'fa', name: 'Fashion'}, {id: '3d', name: '3DCG'}, {id: 'gd', name: 'Graphic Design'}, {id: 'diy', name: 'Do-It-Yourself'}, {id: 'gif', name: 'GIF'}, {id: 'qst', name: 'Quests'}, {id: 'oth', name: 'Other'}, {id: 'biz', name: 'Business & Finance'}, {id: 'trv', name: 'Travel'}, {id: 'fit', name: 'Fitness'}, {id: 'x', name: 'Paranormal'}, {id: 'adv', name: 'Advice'}, {id: 'pony', name: 'Pony'}, {id: 'news', name: 'Current News'}, {id: 'req', name: 'Requests'}, {id: 'vip', name: 'Very Important Posts'}, {id: 'misc', name: 'Miscellaneous'}, {id: 'r', name: 'Random'}, {id: 'pol', name: 'Politics'}, {id: 'nsfw', name: 'Adult & NSFW'} ];
 
 let allDom = {};
 
 /**
- * Main initialization function. It caches DOM elements and sets up the app.
+ * Main initialization function.
  */
 function main() {
-    // --- Safely get Firebase Config from Netlify Environment ---
     let firebaseConfig;
     try {
-        // Netlify injects `Netlify.env` when the feature is enabled.
-        const configString = Netlify.env.get('VITE_FIREBASE_CONFIG');
-        if (!configString) {
-            throw new Error("VITE_FIREBASE_CONFIG environment variable not found.");
+        // The firebaseConfigJSON variable is now globally available from the inline script in index.html
+        // Check if the placeholder was replaced. If not, it will contain '{{-'.
+        if (typeof firebaseConfigJSON !== 'undefined' && !firebaseConfigJSON.includes('{{-')) {
+            firebaseConfig = JSON.parse(firebaseConfigJSON);
+        } else {
+             throw new Error("Firebase config not injected by Netlify. Check Snippet Injection settings.");
         }
-        firebaseConfig = JSON.parse(configString);
     } catch (error) {
-        console.error("Firebase config error:", error.message);
-        document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #ef4444;"><h1>Configuration Error</h1><p>Firebase is not configured correctly. Please check the console and your Netlify environment variables.</p></div>`;
-        return; // Stop execution if config is invalid
+        console.error("Firebase Initialization Failed:", error.message);
+        document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #ef4444;"><h1>Configuration Error</h1><p>${error.message}</p><p>Please check your Netlify environment variables and Post Processing settings.</p></div>`;
+        return; 
     }
-
-    // --- Firebase Initialization ---
+    
+    // --- Initialize Firebase Services ---
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
     storage = getStorage(app);
-    // Use the appId from the successfully parsed config
     appId = firebaseConfig.appId;
 
     // --- Cache DOM Elements ---
@@ -87,9 +86,8 @@ function main() {
     authenticateAndLoad();
 }
 
-/**
- * Sets up the user's profile, either by loading from localStorage or generating a new one.
- */
+// All other functions (setupIdentity, handlePostSubmit, etc.) remain unchanged.
+// ... (paste the rest of your functions here) ...
 function setupIdentity() {
     let storedProfile = localStorage.getItem('userProfile');
     if (storedProfile) {
@@ -101,9 +99,6 @@ function setupIdentity() {
     }
 }
 
-/**
- * Initializes the visual theme (light/dark and color) based on localStorage.
- */
 function setupTheme() {
     const savedColor = localStorage.getItem('colorTheme') || 'warm';
     applyColorTheme(savedColor);
@@ -112,10 +107,6 @@ function setupTheme() {
     updateThemeUI(isDark);
 }
 
-/**
- * Applies a specific color theme to the body.
- * @param {string} themeName - The name of the theme to apply (e.g., 'warm', 'blue').
- */
 function applyColorTheme(themeName) {
     const themePrefix = 'theme-';
     allDom.body.className = allDom.body.className.split(' ').filter(c => !c.startsWith(themePrefix)).join(' ');
@@ -123,19 +114,12 @@ function applyColorTheme(themeName) {
     localStorage.setItem('colorTheme', themeName);
 }
 
-/**
- * Toggles the theme between light and dark mode.
- */
 function toggleTheme() {
     const isCurrentlyDark = allDom.html.classList.contains('dark');
     localStorage.setItem('theme', !isCurrentlyDark ? 'dark' : 'light');
     updateThemeUI(!isCurrentlyDark);
 }
 
-/**
- * Updates the UI elements (icon, classes) to reflect the current theme.
- * @param {boolean} isDark - True if dark mode should be enabled.
- */
 function updateThemeUI(isDark) {
     allDom.html.classList.toggle('dark', isDark);
     allDom.html.classList.toggle('light', !isDark);
@@ -144,16 +128,12 @@ function updateThemeUI(isDark) {
         : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`; // Moon icon
 }
 
-/**
- * Populates the category lists in the sidebar, mobile dropdown, and post modal.
- */
 function setupCategories() {
     allDom.categoryList.innerHTML = '';
     allDom.postCategory.innerHTML = '<option value="">Choose a room...</option>';
     allDom.mobileCategorySelect.innerHTML = '';
 
     categories.forEach(cat => {
-        // Desktop Sidebar
         const link = document.createElement('a');
         link.href = "#";
         link.dataset.catid = cat.id;
@@ -164,7 +144,6 @@ function setupCategories() {
         li.appendChild(link);
         allDom.categoryList.appendChild(li);
 
-        // Mobile Dropdown & Modal Dropdown
         const option = document.createElement('option');
         option.value = cat.id;
         option.textContent = cat.name;
@@ -175,9 +154,6 @@ function setupCategories() {
     });
 }
 
-/**
- * Sets up all the main event listeners for the application.
- */
 function setupEventListeners() {
     allDom.themeToggle.addEventListener('click', toggleTheme);
     allDom.colorThemeBtn.addEventListener('click', (e) => { e.stopPropagation(); allDom.colorOptions.classList.toggle('hidden'); });
@@ -223,13 +199,9 @@ function setupEventListeners() {
         if (allDom.fileUpload.files.length > 0) { allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name; }
     });
 
-    // Delegated event listeners for dynamic content in the post feed
     allDom.postFeed.addEventListener('click', handlePostFeedClick);
 }
 
-/**
- * Handles Firebase authentication and then loads initial data.
- */
 function authenticateAndLoad() {
      onAuthStateChanged(auth, async (user) => {
         if (user) { 
@@ -237,7 +209,6 @@ function authenticateAndLoad() {
             loadPosts(); 
         } else {
             try {
-                // Attempt to sign in with a custom token if provided, otherwise sign in anonymously.
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -250,26 +221,17 @@ function authenticateAndLoad() {
     });
 }
 
-/**
- * Opens a modal with a fade-in animation.
- * @param {HTMLElement} modalEl - The modal element to open.
- */
 function openModal(modalEl) { 
     modalEl.classList.remove('hidden', 'animate-fade-out'); 
     modalEl.classList.add('flex', 'animate-fade-in'); 
 };
 
-/**
- * Closes a modal with a fade-out animation.
- * @param {HTMLElement} modalEl - The modal element to close.
- */
 function closeModal(modalEl) {
      modalEl.classList.remove('animate-fade-in');
      modalEl.classList.add('animate-fade-out');
      setTimeout(() => {
         modalEl.classList.add('hidden');
         modalEl.classList.remove('flex');
-        // Reset form if it's the post modal
         if(modalEl.id === 'postModal') { 
             allDom.postForm.reset(); 
             allDom.fileNameDisplay.textContent = ''; 
@@ -278,10 +240,6 @@ function closeModal(modalEl) {
      }, 300);
 };
 
-/**
- * Manages the state of the post submission button (text, icon, loader).
- * @param {boolean} isSubmitting - True if the form is currently being submitted.
- */
 function setSubmitButtonState(isSubmitting) {
     allDom.submitPostBtn.disabled = isSubmitting;
     allDom.postBtnText.classList.toggle('hidden', isSubmitting);
@@ -289,10 +247,6 @@ function setSubmitButtonState(isSubmitting) {
     allDom.postBtnLoader.classList.toggle('hidden', !isSubmitting);
 }
 
-/**
- * Handles the logic for submitting a new post.
- * @param {Event} e - The form submission event.
- */
 async function handlePostSubmit(e) {
     e.preventDefault();
     const content = allDom.postContent.value.trim();
@@ -305,7 +259,6 @@ async function handlePostSubmit(e) {
 
     setSubmitButtonState(true);
     
-    // Update user profile name if it was changed
     if (userProfile.name !== authorName) {
         userProfile.name = authorName;
         localStorage.setItem('userProfile', JSON.stringify(userProfile));
@@ -333,9 +286,6 @@ async function handlePostSubmit(e) {
     }
 }
 
-/**
- * Sets up a real-time listener for posts from Firestore.
- */
 function loadPosts() {
     const postsCollection = collection(db, `artifacts/${appId}/public/data/posts`);
     const q = firestoreQuery(postsCollection);
@@ -345,9 +295,6 @@ function loadPosts() {
     }, error => console.error("Error loading posts:", error) );
 }
 
-/**
- * Filters, sorts, and renders the posts to the DOM.
- */
 function renderPosts() {
     let postsToRender = [...allPosts];
     const searchTerm = allDom.searchBar.value.toLowerCase() || allDom.searchBarDesktop.value.toLowerCase();
@@ -372,11 +319,6 @@ function renderPosts() {
         : postsToRender.map(createPostElement).join('');
 }
 
-/**
- * Creates the HTML string for a single post.
- * @param {object} post - The post data object.
- * @returns {string} The HTML string for the post.
- */
 function createPostElement(post) {
     const timeAgo = post.timestamp ? moment(post.timestamp.toDate()).fromNow() : 'just now';
     const postUser = post.user || { name: 'Anonymous', icon: animalIcons[0] };
@@ -431,12 +373,6 @@ function createPostElement(post) {
         </div>`;
 }
 
-/**
- * Recursively renders a tree of comments.
- * @param {Array} comments - The array of all comments for a post.
- * @param {string|null} parentId - The ID of the parent comment to render children for.
- * @returns {string} The HTML string for the comment tree.
- */
 function renderCommentTree(comments, parentId = null) {
     if (!comments || comments.length === 0) {
          return parentId ? '' : '<p class="text-sm text-[var(--icon-color)] no-comments">No comments yet.</p>';
@@ -456,11 +392,6 @@ function renderCommentTree(comments, parentId = null) {
     `;
 }
 
-/**
- * Creates the HTML string for a single comment.
- * @param {object} comment - The comment data object.
- * @returns {string} The HTML string for the comment.
- */
 function createCommentElement(comment) {
     const commentUser = comment.user || { name: 'Anonymous', icon: animalIcons[0] };
     const timeAgo = moment(comment.timestamp).fromNow();
@@ -486,10 +417,6 @@ function createCommentElement(comment) {
     `;
 }
 
-/**
- * Handles all click events within the post feed using event delegation.
- * @param {Event} e - The click event.
- */
 function handlePostFeedClick(e) {
     const postEl = e.target.closest('[data-id]');
     if (!postEl) return;
@@ -514,20 +441,13 @@ function handlePostFeedClick(e) {
     }
 }
 
-/**
- * Handles voting logic, preventing duplicate votes and updating Firestore.
- * @param {string} postId - The ID of the post being voted on.
- * @param {string} voteType - The type of vote ('upvotes' or 'downvotes').
- */
 async function handleVote(postId, voteType) {
     const postRef = doc(db, `artifacts/${appId}/public/data/posts`, postId);
     const currentVote = sessionVotes[postId];
-    // Prevent re-voting the same way
     if (currentVote === voteType.slice(0, -1)) return;
 
     const updates = {};
     updates[voteType] = increment(1);
-    // If there was a previous, opposite vote, decrement it
     if (currentVote) {
         const oppositeVoteType = (voteType === 'upvotes') ? 'downvotes' : 'upvotes';
         updates[oppositeVoteType] = increment(-1);
@@ -535,18 +455,11 @@ async function handleVote(postId, voteType) {
     
     try {
         await updateDoc(postRef, updates);
-        // Update session storage to reflect the new vote
         sessionVotes[postId] = voteType.slice(0, -1);
         localStorage.setItem('sessionVotes', JSON.stringify(sessionVotes));
     } catch (error) { console.error("Error voting:", error); }
 }
 
-/**
- * Adds a new comment to a post in Firestore.
- * @param {string} postId - The ID of the post to comment on.
- * @param {string} text - The content of the comment.
- * @param {string|null} parentId - The ID of the parent comment, or null for a top-level comment.
- */
 async function addComment(postId, text, parentId = null) {
      const postRef = doc(db, `artifacts/${appId}/public/data/posts`, postId);
      const newComment = {
@@ -558,12 +471,10 @@ async function addComment(postId, text, parentId = null) {
      };
      try {
         await updateDoc(postRef, { comments: arrayUnion(newComment) });
-        // The onSnapshot listener will automatically handle re-rendering the UI.
      } catch(error) {
         console.error("Error adding comment: ", error);
      }
 }
-
 
 // --- Start the App ---
 // Wait for the DOM to be fully loaded before running the main app logic
