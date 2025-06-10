@@ -26,13 +26,13 @@ let allDom = {};
  * Main initialization function.
  */
 function main() {
+    //error handling
     let firebaseConfig;
     try {
         if (typeof firebaseConfigJSON === 'undefined') {
              throw new Error("The `firebaseConfigJSON` variable was not found on the window. This is a script loading issue.");
         }
         
-        // Check if the placeholder was replaced. If not, the string will still contain '%%'.
         if (firebaseConfigJSON.includes('%%FIREBASE_CONFIG%%')) {
              throw new Error("Firebase config placeholder was not replaced. Check the Netlify build command (`sed ...`) and the `VITE_FIREBASE_CONFIG` environment variable.");
         }

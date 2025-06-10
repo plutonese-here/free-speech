@@ -18,16 +18,10 @@
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- 
-        Firebase configuration is injected here by Netlify during deployment
-        with "sed" through text replacement.
-    -->
-    <script>const firebaseConfigJSON = "%%FIREBASE_CONFIG%%";</script>
 </head>
 <body class="theme-warm">
 
-    <!-- Header, Main Layout, Footer, Modals (No changes here) -->
-    <!-- ... your existing body content ... -->
+    <!-- Header, Main Layout, Footer, Modals -->
     <header class="sticky top-0 z-30 bg-[var(--card-bg)] shadow-md border-b border-[var(--border-color)]">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
@@ -124,7 +118,7 @@
     <!-- Footer -->
     <footer class="bg-[var(--card-bg)] border-t border-[var(--border-color)] mt-12">
         <div class="container mx-auto px-4 py-6 text-center text-xs text-[var(--icon-color)]">
-            <p>All trademarks and copyrights on this page are owned by their respective parties. Images uploaded are the responsibility of the Poster. Comments are owned by the Poster. The devs are not responsible for the users actions.</p>
+            <p>All trademarks and copyrights on this page are owned by their respective parties. Any images/files uploaded are the responsibility of the Poster. Comments are owned by the Commenters. The devs are not accountable for the actions made by the users.</p>
         </div>
     </footer>
 
@@ -171,7 +165,12 @@
             </div>
         </div>
     </div>
-    
+    <!-- 
+        Firebase configuration is injected here by Netlify during deployment
+        with "sed" through text replacement.
+    -->
+    <script>const firebaseConfigJSON = "%%FIREBASE_CONFIG%%";</script>
+
     <!-- Main application script -->
     <script type="module" src="script.js"></script>
 </body>
