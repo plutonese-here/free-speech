@@ -1,28 +1,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-analytics.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, serverTimestamp, query as firestoreQuery, increment, arrayUnion, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
 // --- Firebase Configuration ---
 // These variables are expected to be defined in the environment where this script is run.
-const firebaseConfig = {
-    apiKey: "AIzaSyB_QhLrPbaMK05Oz8CBlLVgpvf2betwtsA",
-    authDomain: "free-speech-app.firebaseapp.com",
-    projectId: "free-speech-app",
-    storageBucket: "free-speech-app.firebasestorage.app",
-    messagingSenderId: "941500352793",
-    appId: "1:941500352793:web:00fc7b5e5891547e3f5d88",
-    measurementId: "G-RZGW3ZLFP3"
-};
-const appId = 'free-speech-app';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'free-speech-default';
 
 // --- Initialize Firebase ---
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-const analytics = getAnalytics(app);
 
 // --- App State ---
 let userId;
