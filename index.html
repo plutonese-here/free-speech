@@ -166,23 +166,20 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs - These MUST come before your main script -->
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-storage-compat.js"></script>
-    
     <!-- Main Application Script -->
+    <script>
+    // The Netlify build command will inject the JSON object directly here.
+    const firebaseConfig = %%FIREBASE_CONFIG%%; 
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
     <script src="script.js"></script>
     <script>
-      /** 
-      ** Firebase configuration is injected here by Netlify during deployment
-      ** with "sed" through text replacement.
-      **/
-      const firebaseConfigJSON = "%%FIREBASE_CONFIG%%";
-      
-      // Wait for the DOM to be fully loaded, then initialize the app.
-      document.addEventListener('DOMContentLoaded', main);
+    // Wait for the DOM, then initialize with our new config object.
+    document.addEventListener('DOMContentLoaded', main);
     </script>
+
 </body>
 </html>

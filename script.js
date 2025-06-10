@@ -19,27 +19,25 @@ const categories = [ {id: 'all', name: 'All Posts'}, {id: 'jp', name: 'Japanese 
 let allDom = {};
 
 function main() {
-    let firebaseConfig;
+    // No more parsing! The firebaseConfig object is already created for us in index.html
     try {
-        if (typeof firebaseConfigJSON === 'undefined') {
-            throw new Error("`firebaseConfigJSON` is not defined. Check the script loading order in index.html.");
+        if (typeof firebaseConfig === 'undefined' || firebaseConfig.apiKey.includes('%%')) {
+             throw new Error("Firebase config object not found or not replaced. Check Netlify build settings.");
         }
-        if (firebaseConfigJSON.includes('%%FIREBASE_CONFIG%%')) {
-            throw new Error("Firebase config placeholder was not replaced. Check Netlify build command and environment variable.");
-        }
-        firebaseConfig = JSON.parse(firebaseConfigJSON);
     } catch (error) {
         console.error("Firebase Initialization Failed:", error);
         document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #fca5a5; font-family: sans-serif;"><h1>Configuration Error</h1><p>${error.message}</p></div>`;
         return;
     }
     
+    // The rest of the function remains the same...
     app = firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
     auth = firebase.auth();
     storage = firebase.storage();
     appId = firebaseConfig.appId;
-
+    
+    // ... cache DOM elements
     allDom = {
         themeToggle: document.getElementById('themeToggle'),
         themeIcon: document.getElementById('themeIcon'),
@@ -69,6 +67,7 @@ function main() {
         colorOptions: document.getElementById('colorOptions'),
     };
     
+    // ... run setup functions
     setupIdentity();
     setupTheme();
     setupCategories();
@@ -219,6 +218,10 @@ async function handlePostSubmit(e) {
     try {
         let fileURL = null, fileType = null;
         if (file) {
+            // Check if storage is enabled before trying to use it
+            if (!storage || typeof storage.ref !== 'function') {
+                throw new Error("Firebase Storage is not enabled for this project. Cannot upload files.");
+            }
             const storageRef = storage.ref(`files/${appId}/${Date.now()}_${file.name}`);
             const snapshot = await storageRef.put(file);
             fileURL = await snapshot.ref.getDownloadURL();
@@ -230,7 +233,11 @@ async function handlePostSubmit(e) {
             upvotes: 0, downvotes: 0, comments: []
         });
         closeModal(allDom.postModal);
-    } catch (error) { console.error("Error adding document: ", error); setSubmitButtonState(false); }
+    } catch (error) { 
+        console.error("Error adding document: ", error); 
+        alert("Could not create post: " + error.message); // Show user a friendly error
+        setSubmitButtonState(false); 
+    }
 }
 
 function loadPosts() {
