@@ -166,15 +166,23 @@
         </div>
     </div>
 
-    <!-- Main application script -->
+    <!-- Firebase SDKs - These MUST come before your main script -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-storage-compat.js"></script>
+    
+    <!-- Main Application Script -->
     <script src="script.js"></script>
     <script>
-        /** 
-        ** Firebase configuration is injected here by Netlify during deployment
-        ** with "sed" through text replacement.
-        **/
-        const firebaseConfigJSON = "%%FIREBASE_CONFIG%%";
-        main(); // Calling the main function after the config is defined.
+      /** 
+      ** Firebase configuration is injected here by Netlify during deployment
+      ** with "sed" through text replacement.
+      **/
+      const firebaseConfigJSON = "%%FIREBASE_CONFIG%%";
+      
+      // Wait for the DOM to be fully loaded, then initialize the app.
+      document.addEventListener('DOMContentLoaded', main);
     </script>
 </body>
 </html>
