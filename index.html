@@ -18,12 +18,11 @@
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Netlify Snippet Injection for Firebase Config -->
-    <script>
-      // This script block will be populated by Netlify during deployment.
-      // The `{{- env... -}}` is a Netlify placeholder.
-      const firebaseConfigJSON = `{{- env.VITE_FIREBASE_CONFIG | safe -}}`;
-    </script>
+    <!-- 
+        Firebase configuration is injected here by Netlify during deployment.
+        This is configured in Netlify under:
+        Site configuration > Build & deploy > Post processing > Snippet injection
+    -->
 </head>
 <body class="theme-warm">
 

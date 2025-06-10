@@ -28,17 +28,38 @@ let allDom = {};
 function main() {
     let firebaseConfig;
     try {
-        // The firebaseConfigJSON variable is now globally available from the inline script in index.html
-        // Check if the placeholder was replaced. If not, it will contain '{{-'.
-        if (typeof firebaseConfigJSON !== 'undefined' && !firebaseConfigJSON.includes('{{-')) {
-            firebaseConfig = JSON.parse(firebaseConfigJSON);
-        } else {
-             throw new Error("Firebase config not injected by Netlify. Check Snippet Injection settings.");
+        // This global variable is expected to be injected by Netlify's "Snippet Injection" feature.
+        // The `firebaseConfigJSON` is a string variable, not the object itself.
+        if (typeof firebaseConfigJSON === 'undefined') {
+            throw new Error("The `firebaseConfigJSON` variable was not found. Ensure Netlify's Snippet Injection is configured correctly.");
         }
+        if (!firebaseConfigJSON || firebaseConfigJSON.trim() === '' || firebaseConfigJSON.includes('{{-')) {
+             throw new Error("The `firebaseConfigJSON` variable is empty or still contains the Netlify placeholder. Check that your `VITE_FIREBASE_CONFIG` environment variable is correctly set in the Netlify UI and contains the JSON configuration string.");
+        }
+        firebaseConfig = JSON.parse(firebaseConfigJSON);
+
     } catch (error) {
-        console.error("Firebase Initialization Failed:", error.message);
-        document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #ef4444;"><h1>Configuration Error</h1><p>${error.message}</p><p>Please check your Netlify environment variables and Post Processing settings.</p></div>`;
-        return; 
+        console.error("Firebase Initialization Failed:", error);
+        // Construct a more helpful, user-friendly error message on the page.
+        let userErrorMessage = `<h1>Configuration Error</h1><p style="color: #fca5a5;">${error.message}</p>`;
+        if (error instanceof SyntaxError) {
+            userErrorMessage += `<p>The provided Firebase config is not valid JSON. This is often caused by an improperly formatted string in your Netlify environment variable. Please ensure the value is a <strong>single line of valid JSON</strong>.</p>`;
+        }
+        userErrorMessage += `
+            <div style="text-align: left; max-width: 600px; margin: 2rem auto; padding: 1rem; border: 1px solid #4b5563; border-radius: 8px; background-color: #374151;">
+                <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Troubleshooting Steps:</h2>
+                <ol style="list-style-position: inside; list-style-type: decimal; padding-left: 1rem; line-height: 1.6;">
+                    <li>Go to your Netlify site dashboard.</li>
+                    <li>Navigate to <strong>Site configuration > Build & deploy > Environment variables</strong>.</li>
+                    <li>Ensure you have a variable named <strong>VITE_FIREBASE_CONFIG</strong>.</li>
+                    <li>Ensure its value is the complete, single-line JSON from your Firebase project settings.</li>
+                    <li>Navigate to <strong>Site configuration > Build & deploy > Post processing</strong>.</li>
+                    <li>Under <strong>Snippet injection</strong>, ensure you have a snippet configured to inject <strong>Before </head></strong> with the exact HTML content from the deployment instructions.</li>
+                </ol>
+            </div>
+        `;
+        document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #f3f4f6; background-color: #1f2937; min-height: 100vh; font-family: sans-serif;">${userErrorMessage}</div>`;
+        return;
     }
     
     // --- Initialize Firebase Services ---
@@ -86,8 +107,6 @@ function main() {
     authenticateAndLoad();
 }
 
-// All other functions (setupIdentity, handlePostSubmit, etc.) remain unchanged.
-// ... (paste the rest of your functions here) ...
 function setupIdentity() {
     let storedProfile = localStorage.getItem('userProfile');
     if (storedProfile) {
@@ -352,9 +371,9 @@ function createPostElement(post) {
                     <div class="flex items-center justify-between">
                         <div class="flex items-center flex-wrap gap-x-2 text-sm">
                             <span class="font-bold">${postUser.name}</span>
-                            <span class="text-[var(--icon-color)]">&middot;</span>
+                            <span class="text-[var(--icon-color)]">·</span>
                             <span class="text-[var(--icon-color)]">${timeAgo}</span>
-                            ${categoryInfo ? `<span class="text-[var(--icon-color)]">&middot;</span> <a href="#" class="text-primary font-semibold board-link" data-catid="${categoryInfo.id}">${categoryInfo.name}</a>` : ''}
+                            ${categoryInfo ? `<span class="text-[var(--icon-color)]">·</span> <a href="#" class="text-primary font-semibold board-link" data-catid="${categoryInfo.id}">${categoryInfo.name}</a>` : ''}
                         </div>
                     </div>
                     <p class="mt-1">${post.content || ''}</p>
@@ -404,7 +423,7 @@ function createCommentElement(comment) {
                     <p class="text-sm">${comment.text}</p>
                 </div>
                 <div class="actions text-xs text-[var(--icon-color)] mt-1 pl-1 flex items-center gap-2">
-                   <span>${timeAgo}</span> &middot; <button class="font-semibold hover:underline reply-to-comment-btn">Reply</button>
+                   <span>${timeAgo}</span> · <button class="font-semibold hover:underline reply-to-comment-btn">Reply</button>
                 </div>
                  <div class="reply-form-container mt-2 hidden">
                     <form class="comment-form flex space-x-2" data-parent-id="${comment.id}">
