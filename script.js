@@ -502,3 +502,4 @@ async function addComment(postId, text, parentId = null) {
 // --- Start the App ---
 // Wait for the DOM to be fully loaded before running the main app logic
 document.addEventListener('DOMContentLoaded', main);
+window.main = main;
