@@ -7,13 +7,13 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 // --- Firebase Configuration ---
 // These variables are expected to be defined in the environment where this script is run.
 const firebaseConfig = {
-apiKey: "AIzaSyB_QhLrPbaMK05Oz8CBlLVgpvf2betwtsA",
-authDomain: "free-speech-app.firebaseapp.com",
-projectId: "free-speech-app",
-storageBucket: "free-speech-app.firebasestorage.app",
-messagingSenderId: "941500352793",
-appId: "1:941500352793:web:00fc7b5e5891547e3f5d88",
-measurementId: "G-RZGW3ZLFP3"
+    apiKey: "AIzaSyB_QhLrPbaMK05Oz8CBlLVgpvf2betwtsA",
+    authDomain: "free-speech-app.firebaseapp.com",
+    projectId: "free-speech-app",
+    storageBucket: "free-speech-app.firebasestorage.app",
+    messagingSenderId: "941500352793",
+    appId: "1:941500352793:web:00fc7b5e5891547e3f5d88",
+    measurementId: "G-RZGW3ZLFP3"
 };
 const appId = 'free-speech-app';
 
@@ -22,6 +22,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+const analytics = getAnalytics(app);
 
 // --- App State ---
 let userId;
