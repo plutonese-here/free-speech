@@ -1,27 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, serverTimestamp, query as firestoreQuery, increment, arrayUnion, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, serverTimestamp, query as firestoreQuery, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-// --- Firebase Configuration ---
-// These variables are expected to be defined in the environment where this script is run.
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'free-speech-default';
-
-// --- Initialize Firebase ---
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const storage = getStorage(app);
-
-// --- App State ---
+// --- App State & Constants (Declared globally) ---
+let app, db, auth, storage, appId;
 let userId;
 let userProfile = {};
 let allPosts = [];
 let currentFilter = { category: 'all', search: '', sort: 'recent' };
 let sessionVotes = JSON.parse(localStorage.getItem('sessionVotes')) || {}; 
 
-// --- Identity & Assets ---
 const adjectives = ["Witty", "Silly", "Clever", "Brave", "Curious", "Dapper", "Eager", "Funky", "Giga", "Happy", "Jolly", "Lazy", "Mega", "Nifty", "Omega", "Pixel", "Quantum", "Retro", "Super", "Turbo", "Ultra", "Vivid", "Wild", "Zen"];
 const nouns = ["Cat", "Dog", "Wombat", "Fox", "Panda", "Penguin", "Dingo", "Gopher", "Koala", "Lemur", "Narwhal", "Ocelot", "Quokka", "Raccoon", "Sloth", "Tarsier", "Unicorn", "Vulture", "Walrus", "Yak", "Zebra"];
 const animalIcons = [
@@ -31,43 +20,58 @@ const animalIcons = [
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 12c0-1.1-.9-2-2-2h-2V7c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2h2v3c0 .55.45 1 1 1s1-.45 1-1v-3h8v3c0 .55.45 1 1 1s1-.45 1-1v-3h2c1.1 0 2-.9 2-2v-5zM8 7h8v3H8V7zm12 10h-2v-5h2v5zM4 12h2v5H4v-5z"/></svg>', // Fox
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-4h8v-2H8v2zm0-4h8v-2H8v2z"/></svg>', // Zebra
 ];
-const categories = [
-    {id: 'all', name: 'All Posts'}, {id: 'jp', name: 'Japanese Culture'}, {id: 'a', name: 'Anime & Manga'}, {id: 'c', name: 'Cosplay'}, {id: 'tr', name: 'Transportation'}, {id: 'oc', name: 'Otaku Culture'}, {id: 'yt', name: 'YouTubers'}, {id: 'vg', name: 'Video Games'}, {id: 'vr', name: 'Retro Games'}, {id: 'int', name: 'Interests'}, {id: 'co', name: 'Comics & Cartoons'}, {id: 'g', name: 'Technology'}, {id: 'tv', name: 'Television & Film'}, {id: 'k', name: 'Weapons'}, {id: 'o', name: 'Auto'}, {id: 'an', name: 'Animals & Nature'}, {id: 'tg', name: 'Traditional Games'}, {id: 'sp', name: 'Sports'}, {id: 'xs', name: 'Extreme Sports'}, {id: 'pw', name: 'Professional Wrestling'}, {id: 'sci', name: 'Science & Math'}, {id: 'his', name: 'History & Humanities'}, {id: 'int', name: 'International'}, {id: 'out', name: 'Outdoors'}, {id: 'toy', 'name': 'Toys'}, {id: 'cr', name: 'Creative'}, {id: 'i', name: 'Oekaki'}, {id: 'po', name: 'Papercraft & Origami'}, {id: 'p', name: 'Photography'}, {id: 'ck', name: 'Food & Cooking'}, {id: 'ac', name: 'Artwork/Critique'}, {id: 'w', name: 'Wallpapers'}, {id: 'lit', name: 'Literature'}, {id: 'mu', name: 'Music'}, {id: 'fa', name: 'Fashion'}, {id: '3d', name: '3DCG'}, {id: 'gd', name: 'Graphic Design'}, {id: 'diy', name: 'Do-It-Yourself'}, {id: 'gif', name: 'GIF'}, {id: 'qst', name: 'Quests'}, {id: 'oth', name: 'Other'}, {id: 'biz', name: 'Business & Finance'}, {id: 'trv', name: 'Travel'}, {id: 'fit', name: 'Fitness'}, {id: 'x', name: 'Paranormal'}, {id: 'adv', name: 'Advice'}, {id: 'pony', name: 'Pony'}, {id: 'news', name: 'Current News'}, {id: 'req', name: 'Requests'}, {id: 'vip', name: 'Very Important Posts'}, {id: 'misc', name: 'Miscellaneous'}, {id: 'r', name: 'Random'}, {id: 'pol', name: 'Politics'}, {id: 'nsfw', name: 'Adult & NSFW'}
-];
+const categories = [ {id: 'all', name: 'All Posts'}, {id: 'jp', name: 'Japanese Culture'}, {id: 'a', name: 'Anime & Manga'}, {id: 'c', name: 'Cosplay'}, {id: 'tr', name: 'Transportation'}, {id: 'oc', name: 'Otaku Culture'}, {id: 'yt', name: 'YouTubers'}, {id: 'vg', name: 'Video Games'}, {id: 'vr', name: 'Retro Games'}, {id: 'int', name: 'Interests'}, {id: 'co', name: 'Comics & Cartoons'}, {id: 'g', name: 'Technology'}, {id: 'tv', name: 'Television & Film'}, {id: 'k', name: 'Weapons'}, {id: 'o', name: 'Auto'}, {id: 'an', name: 'Animals & Nature'}, {id: 'tg', name: 'Traditional Games'}, {id: 'sp', name: 'Sports'}, {id: 'xs', name: 'Extreme Sports'}, {id: 'pw', name: 'Professional Wrestling'}, {id: 'sci', name: 'Science & Math'}, {id: 'his', name: 'History & Humanities'}, {id: 'int', name: 'International'}, {id: 'out', name: 'Outdoors'}, {id: 'toy', 'name': 'Toys'}, {id: 'cr', name: 'Creative'}, {id: 'i', name: 'Oekaki'}, {id: 'po', name: 'Papercraft & Origami'}, {id: 'p', name: 'Photography'}, {id: 'ck', name: 'Food & Cooking'}, {id: 'ac', name: 'Artwork/Critique'}, {id: 'w', name: 'Wallpapers'}, {id: 'lit', name: 'Literature'}, {id: 'mu', name: 'Music'}, {id: 'fa', name: 'Fashion'}, {id: '3d', name: '3DCG'}, {id: 'gd', name: 'Graphic Design'}, {id: 'diy', name: 'Do-It-Yourself'}, {id: 'gif', name: 'GIF'}, {id: 'qst', name: 'Quests'}, {id: 'oth', name: 'Other'}, {id: 'biz', name: 'Business & Finance'}, {id: 'trv', name: 'Travel'}, {id: 'fit', name: 'Fitness'}, {id: 'x', name: 'Paranormal'}, {id: 'adv', name: 'Advice'}, {id: 'pony', name: 'Pony'}, {id: 'news', name: 'Current News'}, {id: 'req', name: 'Requests'}, {id: 'vip', name: 'Very Important Posts'}, {id: 'misc', name: 'Miscellaneous'}, {id: 'r', name: 'Random'}, {id: 'pol', name: 'Politics'}, {id: 'nsfw', name: 'Adult & NSFW'} ];
 
+let allDom = {};
 
-// --- DOM Elements ---
-const allDom = {
-    themeToggle: document.getElementById('themeToggle'),
-    themeIcon: document.getElementById('themeIcon'),
-    html: document.documentElement,
-    body: document.body,
-    newPostBtn: document.getElementById('newPostBtn'),
-    postModal: document.getElementById('postModal'),
-    closeModalBtn: document.getElementById('closeModalBtn'),
-    postForm: document.getElementById('postForm'),
-    postContent: document.getElementById('postContent'),
-    postCategory: document.getElementById('postCategory'),
-    postAuthor: document.getElementById('postAuthor'),
-    fileUpload: document.getElementById('fileUpload'),
-    fileNameDisplay: document.getElementById('fileName'),
-    submitPostBtn: document.getElementById('submitPostBtn'),
-    postBtnText: document.getElementById('postBtnText'),
-    postBtnIcon: document.getElementById('postBtnIcon'),
-    postBtnLoader: document.getElementById('postBtnLoader'),
-    postFeed: document.getElementById('postFeed'),
-    searchBar: document.getElementById('searchBar'),
-    searchBarDesktop: document.getElementById('searchBarDesktop'),
-    sortOrder: document.getElementById('sortOrder'),
-    categoryList: document.getElementById('categoryList'),
-    mobileCategorySelect: document.getElementById('mobileCategorySelect'),
-    categoryTitle: document.getElementById('categoryTitle'),
-    colorThemeBtn: document.getElementById('colorThemeBtn'),
-    colorOptions: document.getElementById('colorOptions'),
-};
+/**
+ * Main initialization function. It caches DOM elements and sets up the app.
+ */
+function main() {
+    // --- Firebase Initialization ---
+    const firebaseConfig = window.firebaseConfig;
+    if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+        console.error("Firebase config is missing or invalid. App will not function correctly.");
+        document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #ef4444;"><h1>Configuration Error</h1><p>Firebase is not configured correctly. Please check your Netlify environment variables.</p></div>`;
+        return; // Stop execution if Firebase is not configured
+    }
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    storage = getStorage(app);
+    appId = window.appId;
 
-// --- Initialization ---
-function init() {
+    // --- Cache DOM Elements ---
+    allDom = {
+        themeToggle: document.getElementById('themeToggle'),
+        themeIcon: document.getElementById('themeIcon'),
+        html: document.documentElement,
+        body: document.body,
+        newPostBtn: document.getElementById('newPostBtn'),
+        postModal: document.getElementById('postModal'),
+        closeModalBtn: document.getElementById('closeModalBtn'),
+        postForm: document.getElementById('postForm'),
+        postContent: document.getElementById('postContent'),
+        postCategory: document.getElementById('postCategory'),
+        postAuthor: document.getElementById('postAuthor'),
+        fileUpload: document.getElementById('fileUpload'),
+        fileNameDisplay: document.getElementById('fileName'),
+        submitPostBtn: document.getElementById('submitPostBtn'),
+        postBtnText: document.getElementById('postBtnText'),
+        postBtnIcon: document.getElementById('postBtnIcon'),
+        postBtnLoader: document.getElementById('postBtnLoader'),
+        postFeed: document.getElementById('postFeed'),
+        searchBar: document.getElementById('searchBar'),
+        searchBarDesktop: document.getElementById('searchBarDesktop'),
+        sortOrder: document.getElementById('sortOrder'),
+        categoryList: document.getElementById('categoryList'),
+        mobileCategorySelect: document.getElementById('mobileCategorySelect'),
+        categoryTitle: document.getElementById('categoryTitle'),
+        colorThemeBtn: document.getElementById('colorThemeBtn'),
+        colorOptions: document.getElementById('colorOptions'),
+    };
+    
+    // --- Run Setup Functions ---
     setupIdentity();
     setupTheme();
     setupCategories();
@@ -562,4 +566,5 @@ async function addComment(postId, text, parentId = null) {
 }
 
 // --- Start the App ---
-init();
+// Wait for the DOM to be fully loaded before running the app logic
+document.addEventListener('DOMContentLoaded', main);

@@ -17,10 +17,40 @@
     
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase Configuration Script -->
+    <script>
+      // This block securely loads your Firebase configuration.
+      // On Netlify, it reads from an environment variable.
+      // For local testing, it uses a fallback configuration.
+      const netlifyConfig = '{{- env.VITE_FIREBASE_CONFIG | safe -}}';
+
+      if (netlifyConfig && !netlifyConfig.startsWith('{{')) {
+          // If the Netlify variable is set, parse and use it.
+          window.firebaseConfig = JSON.parse(netlifyConfig);
+      } else {
+          // ** Fallback for Local Development ONLY **
+          // Replace the values below with your actual Firebase config for local testing.
+          // IMPORTANT: Do NOT commit your real keys to a public repository.
+          console.warn("Using fallback Firebase config. This is for local development. Make sure VITE_FIREBASE_CONFIG is set in your Netlify environment.");
+          window.firebaseConfig = {
+              apiKey: "YOUR_API_KEY",
+              authDomain: "YOUR_AUTH_DOMAIN",
+              projectId: "YOUR_PROJECT_ID",
+              storageBucket: "YOUR_STORAGE_BUCKET",
+              messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+              appId: "YOUR_APP_ID"
+          };
+      }
+      
+      // Set the App ID from environment variables or use a default
+      window.appId = '{{- env.APP_ID -}}' || 'free-speech-default';
+    </script>
 </head>
 <body class="theme-warm">
 
-    <!-- Header -->
+    <!-- Header, Main Layout, Footer, Modals (No changes here) -->
+    <!-- ... your existing body content ... -->
     <header class="sticky top-0 z-30 bg-[var(--card-bg)] shadow-md border-b border-[var(--border-color)]">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
