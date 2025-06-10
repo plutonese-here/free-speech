@@ -17,8 +17,6 @@ const animalIcons = [
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>', // Panda
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.79 13.5l-1.79-1.79c.35-.58.58-1.25.58-2.02 0-2.21-1.79-4-4-4s-4 1.79-4 4c0 .77.23 1.44.58 2.02L6.42 15.5C4.9 14.28 4 12.24 4 10c0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.24-.9 4.28-2.42 5.5zM12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>', // Dog
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 7h-7L12 5.5l3.5 3.5zM12 17.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 8.5 12 8.5s4.5 2.01 4.5 4.5S14.49 17.5 12 17.5z"/></svg>', // Cat
-    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 12c0-1.1-.9-2-2-2h-2V7c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2h2v3c0 .55.45 1 1 1s1-.45 1-1v-3h8v3c0 .55.45 1 1 1s1-.45 1-1v-3h2c1.1 0 2-.9 2-2v-5zM8 7h8v3H8V7zm12 10h-2v-5h2v5zM4 12h2v5H4v-5z"/></svg>', // Fox
-    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-4h8v-2H8v2zm0-4h8v-2H8v2z"/></svg>', // Zebra
 ];
 const categories = [ {id: 'all', name: 'All Posts'}, {id: 'jp', name: 'Japanese Culture'}, {id: 'a', name: 'Anime & Manga'}, {id: 'c', name: 'Cosplay'}, {id: 'tr', name: 'Transportation'}, {id: 'oc', name: 'Otaku Culture'}, {id: 'yt', name: 'YouTubers'}, {id: 'vg', name: 'Video Games'}, {id: 'vr', name: 'Retro Games'}, {id: 'int', name: 'Interests'}, {id: 'co', name: 'Comics & Cartoons'}, {id: 'g', name: 'Technology'}, {id: 'tv', name: 'Television & Film'}, {id: 'k', name: 'Weapons'}, {id: 'o', name: 'Auto'}, {id: 'an', name: 'Animals & Nature'}, {id: 'tg', name: 'Traditional Games'}, {id: 'sp', name: 'Sports'}, {id: 'xs', name: 'Extreme Sports'}, {id: 'pw', name: 'Professional Wrestling'}, {id: 'sci', name: 'Science & Math'}, {id: 'his', name: 'History & Humanities'}, {id: 'int', name: 'International'}, {id: 'out', name: 'Outdoors'}, {id: 'toy', 'name': 'Toys'}, {id: 'cr', name: 'Creative'}, {id: 'i', name: 'Oekaki'}, {id: 'po', name: 'Papercraft & Origami'}, {id: 'p', name: 'Photography'}, {id: 'ck', name: 'Food & Cooking'}, {id: 'ac', name: 'Artwork/Critique'}, {id: 'w', name: 'Wallpapers'}, {id: 'lit', name: 'Literature'}, {id: 'mu', name: 'Music'}, {id: 'fa', name: 'Fashion'}, {id: '3d', name: '3DCG'}, {id: 'gd', name: 'Graphic Design'}, {id: 'diy', name: 'Do-It-Yourself'}, {id: 'gif', name: 'GIF'}, {id: 'qst', name: 'Quests'}, {id: 'oth', name: 'Other'}, {id: 'biz', name: 'Business & Finance'}, {id: 'trv', name: 'Travel'}, {id: 'fit', name: 'Fitness'}, {id: 'x', name: 'Paranormal'}, {id: 'adv', name: 'Advice'}, {id: 'pony', name: 'Pony'}, {id: 'news', name: 'Current News'}, {id: 'req', name: 'Requests'}, {id: 'vip', name: 'Very Important Posts'}, {id: 'misc', name: 'Miscellaneous'}, {id: 'r', name: 'Random'}, {id: 'pol', name: 'Politics'}, {id: 'nsfw', name: 'Adult & NSFW'} ];
 
@@ -28,18 +26,28 @@ let allDom = {};
  * Main initialization function. It caches DOM elements and sets up the app.
  */
 function main() {
-    // --- Firebase Initialization ---
-    const firebaseConfig = window.firebaseConfig;
-    if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
-        console.error("Firebase config is missing or invalid. App will not function correctly.");
-        document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #ef4444;"><h1>Configuration Error</h1><p>Firebase is not configured correctly. Please check your Netlify environment variables.</p></div>`;
-        return; // Stop execution if Firebase is not configured
+    // --- Safely get Firebase Config from Netlify Environment ---
+    let firebaseConfig;
+    try {
+        // Netlify injects `Netlify.env` when the feature is enabled.
+        const configString = Netlify.env.get('VITE_FIREBASE_CONFIG');
+        if (!configString) {
+            throw new Error("VITE_FIREBASE_CONFIG environment variable not found.");
+        }
+        firebaseConfig = JSON.parse(configString);
+    } catch (error) {
+        console.error("Firebase config error:", error.message);
+        document.body.innerHTML = `<div style="padding: 2rem; text-align: center; color: #ef4444;"><h1>Configuration Error</h1><p>Firebase is not configured correctly. Please check the console and your Netlify environment variables.</p></div>`;
+        return; // Stop execution if config is invalid
     }
+
+    // --- Firebase Initialization ---
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
     storage = getStorage(app);
-    appId = window.appId;
+    // Use the appId from the successfully parsed config
+    appId = firebaseConfig.appId;
 
     // --- Cache DOM Elements ---
     allDom = {
@@ -242,8 +250,6 @@ function authenticateAndLoad() {
     });
 }
 
-// --- Modal & Post Functions ---
-
 /**
  * Opens a modal with a fade-in animation.
  * @param {HTMLElement} modalEl - The modal element to open.
@@ -327,8 +333,6 @@ async function handlePostSubmit(e) {
     }
 }
 
-// --- Post Loading & Rendering ---
-
 /**
  * Sets up a real-time listener for posts from Firestore.
  */
@@ -348,26 +352,21 @@ function renderPosts() {
     let postsToRender = [...allPosts];
     const searchTerm = allDom.searchBar.value.toLowerCase() || allDom.searchBarDesktop.value.toLowerCase();
 
-    // Apply search filter
     if (searchTerm) { 
         postsToRender = postsToRender.filter(p => p.content?.toLowerCase().includes(searchTerm)); 
     }
-    // Apply category filter
     if (currentFilter.category !== 'all') { 
         postsToRender = postsToRender.filter(p => p.category === currentFilter.category); 
     }
 
-    // Apply sorting
     postsToRender.sort((a, b) => {
         const scoreA = (a.upvotes || 0) - (a.downvotes || 0);
         const scoreB = (b.upvotes || 0) - (b.downvotes || 0);
         if (currentFilter.sort === 'upvoted') return scoreB - scoreA;
         if (currentFilter.sort === 'commented') return (b.comments?.length || 0) - (a.comments?.length || 0);
-        // Default sort by most recent
         return (b.timestamp?.toDate() || 0) - (a.timestamp?.toDate() || 0);
     });
 
-    // Render to DOM
     allDom.postFeed.innerHTML = postsToRender.length === 0 
         ? `<div class="card p-8 text-center text-[var(--icon-color)]">No posts found. Try changing your filters!</div>`
         : postsToRender.map(createPostElement).join('');
@@ -565,6 +564,7 @@ async function addComment(postId, text, parentId = null) {
      }
 }
 
+
 // --- Start the App ---
-// Wait for the DOM to be fully loaded before running the app logic
+// Wait for the DOM to be fully loaded before running the main app logic
 document.addEventListener('DOMContentLoaded', main);
