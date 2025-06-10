@@ -19,10 +19,10 @@
     <link rel="stylesheet" href="style.css">
 
     <!-- 
-        Firebase configuration is injected here by Netlify during deployment.
-        This is configured in Netlify under:
-        Site configuration > Build & deploy > Post processing > Snippet injection
+        Firebase configuration is injected here by Netlify during deployment
+        with "sed" through text replacement.
     -->
+    <script>const firebaseConfigJSON = "%%FIREBASE_CONFIG%%";</script>
 </head>
 <body class="theme-warm">
 
