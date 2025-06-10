@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>free-speech</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Moment.js for time formatting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-warm">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-[var(--card-bg)] shadow-md border-b border-[var(--border-color)]">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V7a2 2 0 012-2h6l2-2h2l-2 2z"></path></svg>
+                <h1 class="text-xl sm:text-2xl font-bold">free-speech</h1>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button id="newPostBtn" class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded-full flex items-center space-x-2 transition duration-300 transform hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    <span class="hidden md:inline">New Post</span>
+                </button>
+                <div class="relative">
+                    <button id="colorThemeBtn" class="p-2 rounded-full focus:outline-none transition duration-300 transform hover:scale-110">
+                        <svg class="w-6 h-6 icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                    </button>
+                     <div id="colorOptions" class="dropdown-menu absolute right-0 mt-2 w-12 rounded-md shadow-lg py-1 z-20 hidden">
+                        <button data-theme="warm" class="block w-full text-left px-3 py-1 text-sm"><span class="w-6 h-6 rounded-full bg-amber-500 inline-block"></span></button>
+                        <button data-theme="blue" class="block w-full text-left px-3 py-1 text-sm"><span class="w-6 h-6 rounded-full bg-blue-500 inline-block"></span></button>
+                        <button data-theme="green" class="block w-full text-left px-3 py-1 text-sm"><span class="w-6 h-6 rounded-full bg-green-500 inline-block"></span></button>
+                        <button data-theme="red" class="block w-full text-left px-3 py-1 text-sm"><span class="w-6 h-6 rounded-full bg-red-500 inline-block"></span></button>
+                    </div>
+                </div>
+                <button id="themeToggle" class="p-2 rounded-full focus:outline-none transition duration-300 transform hover:rotate-45">
+                    <svg id="themeIcon" class="w-6 h-6 icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 py-8 grid grid-cols-1 md:grid-cols-12 gap-8">
+        <!-- Main Content -->
+        <main class="md:col-span-8 lg:col-span-9">
+             <!-- Mobile Controls -->
+            <div class="md:hidden card p-4 mb-4 flex flex-col gap-4">
+                <div class="relative w-full">
+                    <select id="mobileCategorySelect" class="w-full p-2 rounded-full bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary appearance-none">
+                        <!-- Mobile categories will be injected here -->
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[var(--icon-color)]">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                </div>
+                 <div class="relative flex-grow w-full">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <input type="search" id="searchBar" placeholder="Search posts..." class="w-full p-2 pl-10 rounded-full bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+            </div>
+
+             <!-- Desktop Controls -->
+            <div class="hidden md:flex card p-4 mb-4 gap-4 items-center">
+                <div class="relative flex-grow w-full">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <input type="search" id="searchBarDesktop" placeholder="Search posts..." class="w-full p-2 pl-10 rounded-full bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div class="flex-shrink-0 w-auto relative">
+                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M4 10h14M7 16h4" /></svg>
+                     </div>
+                    <select id="sortOrder" class="w-full p-2 pl-10 rounded-full bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary appearance-none">
+                        <option value="recent">Sort: Most Recent</option>
+                        <option value="upvoted">Sort: Most Upvoted</option>
+                        <option value="commented">Sort: Most Commented</option>
+                    </select>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-bold mb-4" id="categoryTitle">All Posts</h2>
+            <div id="postFeed" class="space-y-6">
+                <!-- Posts will be injected here -->
+            </div>
+        </main>
+        
+        <!-- Sidebar -->
+        <aside class="hidden md:block md:col-span-4 lg:col-span-3">
+            <div class="sticky top-24">
+                <div class="card rounded-lg p-4">
+                    <h3 class="font-bold text-lg mb-4">Rooms</h3>
+                    <div class="max-h-[calc(100vh-12rem)] overflow-y-auto pr-2">
+                        <ul id="categoryList" class="space-y-1">
+                            <!-- Categories will be injected here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[var(--card-bg)] border-t border-[var(--border-color)] mt-12">
+        <div class="container mx-auto px-4 py-6 text-center text-xs text-[var(--icon-color)]">
+            <p>All trademarks and copyrights on this page are owned by their respective parties. Images uploaded are the responsibility of the Poster. Comments are owned by the Poster. The devs are not responsible for the users actions.</p>
+        </div>
+    </footer>
+
+    <!-- New Post Modal -->
+    <div id="postModal" class="fixed inset-0 z-50 items-center justify-center hidden animate-fade-in">
+        <div class="modal-backdrop fixed inset-0"></div>
+        <div class="card rounded-lg shadow-xl w-full max-w-2xl mx-auto z-10 m-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Create a new post</h2>
+                    <button id="closeModalBtn" class="p-2 rounded-full hover:bg-[var(--border-color)] transition duration-300">
+                         <svg class="w-6 h-6 icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <form id="postForm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="postCategory" class="block text-sm font-medium mb-1">Room <span class="text-red-500">*</span></label>
+                            <select id="postCategory" required class="w-full p-2 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary">
+                               <option value="">Choose a room...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="postAuthor" class="block text-sm font-medium mb-1">Name</label>
+                            <input type="text" id="postAuthor" class="w-full p-2 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                    </div>
+                    <textarea id="postContent" class="w-full p-3 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary" rows="5" placeholder="What's on your mind?"></textarea>
+                    <div class="mt-4 flex justify-between items-center">
+                        <div class="flex space-x-2">
+                           <label for="fileUpload" class="cursor-pointer p-2 rounded-full hover:bg-[var(--border-color)] transition duration-300" title="Attach file">
+                               <input type="file" id="fileUpload" class="hidden">
+                               <svg class="w-6 h-6 icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                           </label>
+                           <div id="fileName" class="text-sm self-center"></div>
+                        </div>
+                        <button type="submit" id="submitPostBtn" class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-6 rounded-full transition duration-300 transform hover:scale-105 flex items-center space-x-2">
+                            <span id="postBtnText">Post</span>
+                            <svg id="postBtnIcon" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            <div id="postBtnLoader" class="loader !w-5 !h-5 !border-2 !border-t-white hidden"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main application script -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
