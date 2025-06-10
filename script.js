@@ -28,33 +28,33 @@ let allDom = {};
 function main() {
     let firebaseConfig;
     try {
-        // This global variable is expected to be injected by Netlify's "Snippet Injection" feature.
-        // The `firebaseConfigJSON` is a string variable, not the object itself.
         if (typeof firebaseConfigJSON === 'undefined') {
-            throw new Error("The `firebaseConfigJSON` variable was not found. Ensure Netlify's Snippet Injection is configured correctly.");
+             throw new Error("The `firebaseConfigJSON` variable was not found on the window. This is a script loading issue.");
         }
-        if (!firebaseConfigJSON || firebaseConfigJSON.trim() === '' || firebaseConfigJSON.includes('{{-')) {
-             throw new Error("The `firebaseConfigJSON` variable is empty or still contains the Netlify placeholder. Check that your `VITE_FIREBASE_CONFIG` environment variable is correctly set in the Netlify UI and contains the JSON configuration string.");
+        
+        // Check if the placeholder was replaced. If not, the string will still contain '%%'.
+        if (firebaseConfigJSON.includes('%%FIREBASE_CONFIG%%')) {
+             throw new Error("Firebase config placeholder was not replaced. Check the Netlify build command (`sed ...`) and the `VITE_FIREBASE_CONFIG` environment variable.");
         }
+        
         firebaseConfig = JSON.parse(firebaseConfigJSON);
 
     } catch (error) {
         console.error("Firebase Initialization Failed:", error);
-        // Construct a more helpful, user-friendly error message on the page.
         let userErrorMessage = `<h1>Configuration Error</h1><p style="color: #fca5a5;">${error.message}</p>`;
         if (error instanceof SyntaxError) {
-            userErrorMessage += `<p>The provided Firebase config is not valid JSON. This is often caused by an improperly formatted string in your Netlify environment variable. Please ensure the value is a <strong>single line of valid JSON</strong>.</p>`;
+            userErrorMessage += `<p>The Firebase config string injected into the HTML is not valid JSON. Please verify the <strong>VITE_FIREBASE_CONFIG</strong> value in your Netlify settings is a correctly formatted, single-line JSON string.</p>`;
         }
         userErrorMessage += `
             <div style="text-align: left; max-width: 600px; margin: 2rem auto; padding: 1rem; border: 1px solid #4b5563; border-radius: 8px; background-color: #374151;">
                 <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Troubleshooting Steps:</h2>
                 <ol style="list-style-position: inside; list-style-type: decimal; padding-left: 1rem; line-height: 1.6;">
                     <li>Go to your Netlify site dashboard.</li>
+                    <li>Navigate to <strong>Site configuration > Build & deploy > Build settings</strong>.</li>
+                    <li>Ensure your <strong>Build command</strong> is exactly: <code style="background: #1f2937; padding: 2px 4px; border-radius: 4px;">sed -i "s|%%FIREBASE_CONFIG%%|$VITE_FIREBASE_CONFIG|g" index.html</code></li>
                     <li>Navigate to <strong>Site configuration > Build & deploy > Environment variables</strong>.</li>
-                    <li>Ensure you have a variable named <strong>VITE_FIREBASE_CONFIG</strong>.</li>
-                    <li>Ensure its value is the complete, single-line JSON from your Firebase project settings.</li>
-                    <li>Navigate to <strong>Site configuration > Build & deploy > Post processing</strong>.</li>
-                    <li>Under <strong>Snippet injection</strong>, ensure you have a snippet configured to inject <strong>Before </head></strong> with the exact HTML content from the deployment instructions.</li>
+                    <li>Ensure you have a variable named <strong>VITE_FIREBASE_CONFIG</strong> with your single-line JSON as its value.</li>
+                    <li>Trigger a new deploy using "Deploy without cache".</li>
                 </ol>
             </div>
         `;
@@ -306,12 +306,16 @@ async function handlePostSubmit(e) {
 }
 
 function loadPosts() {
+    allDom.postFeed.innerHTML = `<div class="card p-8 text-center text-[var(--icon-color)] flex items-center justify-center gap-4"><div class="loader"></div> Loading posts...</div>`;
     const postsCollection = collection(db, `artifacts/${appId}/public/data/posts`);
     const q = firestoreQuery(postsCollection);
     onSnapshot(q, (snapshot) => {
         allPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderPosts();
-    }, error => console.error("Error loading posts:", error) );
+    }, error => {
+        console.error("Error loading posts:", error) 
+        allDom.postFeed.innerHTML = `<div class="card p-8 text-center text-red-500">Error loading posts. Check the browser console for details.</div>`;
+    });
 }
 
 function renderPosts() {
