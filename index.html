@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>free-speech</title>
+    <link rel="icon" type="image/x-icon" href="/source/favicon.svg">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -17,12 +18,12 @@
     
     <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body class="theme-warm">
 
-    <!-- Header, Main Layout, Footer, Modals -->
-    <header class="sticky top-0 z-30 bg-[var(--card-bg)] shadow-md border-b border-[var(--border-color)]">
+    <!-- Your existing body HTML (header, main, modals, footer) goes here -->
+    <!-- ... -->
+     <header class="sticky top-0 z-30 bg-[var(--card-bg)] shadow-md border-b border-[var(--border-color)]">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
                 <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V7a2 2 0 012-2h6l2-2h2l-2 2z"></path></svg>
@@ -166,20 +167,26 @@
         </div>
     </div>
 
-    <!-- Main Application Script -->
+
+    <!-- The Correct Script Loading Order -->
+
+    <!-- This is where Netlify will inject your config as a JS object -->
     <script>
-    // The Netlify build command will inject the JSON object directly here.
-    const firebaseConfig = %%FIREBASE_CONFIG%%; 
+        const firebaseConfig = %%FIREBASE_CONFIG%%; 
     </script>
+    
+    <!-- Firebase SDKs - These MUST come after config and before your main script -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    
+    <!-- Your main application script -->
     <script src="script.js"></script>
+    
+    <!-- The trigger to start the app -->
     <script>
-    // Wait for the DOM, then initialize with our new config object.
-    document.addEventListener('DOMContentLoaded', main);
+      document.addEventListener('DOMContentLoaded', main);
     </script>
-
 </body>
 </html>
