@@ -58,7 +58,11 @@ function main() {
         postBtnLoader: document.getElementById('postBtnLoader'),
         postFeed: document.getElementById('postFeed'),
         searchBar: document.getElementById('searchBar'),
-        searchBarDesktop: document.getElementById('searchBarDesktop'),
+        searchWrapper: document.getElementById('search-wrapper'),
+        searchToggleBtn: document.getElementById('search-toggle-btn'),
+        roomSelectorWrapper: document.getElementById('room-selector-wrapper'),
+        sortToggleBtn: document.getElementById('sort-toggle-btn'),
+        sortMenuMobile: document.getElementById('sort-menu-mobile'),
         sortOrder: document.getElementById('sortOrder'),
         categoryList: document.getElementById('categoryList'),
         mobileCategorySelect: document.getElementById('mobileCategorySelect'),
@@ -137,43 +141,144 @@ function setupCategories() {
 
 // Attaches all necessary event listeners to the DOM
 function setupEventListeners() {
+    // --- Unchanged Listeners (Theming, New Post Modal) ---
     allDom.themeToggle.addEventListener('click', toggleTheme);
     allDom.colorThemeBtn.addEventListener('click', (e) => { e.stopPropagation(); allDom.colorOptions.classList.toggle('hidden'); });
-    document.addEventListener('click', () => { if(allDom.colorOptions) allDom.colorOptions.classList.add('hidden'); });
-    allDom.colorOptions.addEventListener('click', (e) => {
-        const button = e.target.closest('button[data-theme]');
-        if (button) { applyColorTheme(button.dataset.theme); allDom.colorOptions.classList.add('hidden'); }
-    });
     allDom.newPostBtn.addEventListener('click', () => {
         allDom.postAuthor.value = userProfile.name;
         openModal(allDom.postModal);
     });
     allDom.closeModalBtn.addEventListener('click', () => closeModal(allDom.postModal));
     allDom.postModal.querySelector('.modal-backdrop').addEventListener('click', () => closeModal(allDom.postModal));
-    const handleSearch = (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); };
-    allDom.searchBar.addEventListener('input', handleSearch);
-    allDom.searchBarDesktop.addEventListener('input', handleSearch);
-    allDom.sortOrder.addEventListener('change', (e) => { currentFilter.sort = e.target.value; renderPosts(); });
-    const handleCategoryChange = (catId) => {
-        currentFilter.category = catId;
-        const cat = categories.find(c => c.id === currentFilter.category);
-        allDom.categoryTitle.textContent = cat ? cat.name : "All Posts";
-        document.querySelectorAll('#categoryList a').forEach(a => a.classList.remove('category-selected'));
-        document.querySelector(`#categoryList a[data-catid="${catId}"]`)?.classList.add('category-selected');
-        allDom.mobileCategorySelect.value = catId;
-        renderPosts();
-    };
-    allDom.categoryList.addEventListener('click', (e) => {
-         e.preventDefault();
-         const link = e.target.closest('a[data-catid]');
-         if (link) handleCategoryChange(link.dataset.catid);
-    });
-    allDom.mobileCategorySelect.addEventListener('change', (e) => handleCategoryChange(e.target.value));
     allDom.postForm.addEventListener('submit', handlePostSubmit);
     allDom.fileUpload.addEventListener('change', () => {
         if (allDom.fileUpload.files.length > 0) allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name;
     });
+
+    // --- Core Feed Interaction ---
     allDom.postFeed.addEventListener('click', handlePostFeedClick);
+
+    // --- NEW Unified Controls Logic ---
+
+    // 1. Unified Search Bar
+    allDom.searchBar.addEventListener('input', (e) => {
+        currentFilter.search = e.target.value.toLowerCase();
+        renderPosts();
+    });
+
+    // 2. Room / Category Selection
+    const handleCategoryChange = (catId) => {
+        currentFilter.category = catId;
+        const cat = categories.find(c => c.id === currentFilter.category);
+        allDom.categoryTitle.textContent = cat ? cat.name : "All Posts";
+        
+        document.querySelectorAll('#categoryList a').forEach(a => a.classList.remove('category-selected'));
+        const link = document.querySelector(`#categoryList a[data-catid="${catId}"]`);
+        if (link) {
+            link.classList.add('category-selected');
+        }
+        
+        allDom.mobileCategorySelect.value = catId;
+        renderPosts();
+    };
+    allDom.categoryList.addEventListener('click', (e) => {
+        e.preventDefault();
+        const link = e.target.closest('a[data-catid]');
+        if (link) handleCategoryChange(link.dataset.catid);
+    });
+    allDom.mobileCategorySelect.addEventListener('change', (e) => handleCategoryChange(e.target.value));
+
+    // 3. Sorting Logic (Desktop and Mobile)
+    const handleSortChange = (sortValue) => {
+        currentFilter.sort = sortValue;
+        allDom.sortOrder.value = sortValue; // Keep desktop <select> in sync
+        renderPosts();
+    };
+
+    // Desktop sort dropdown
+    allDom.sortOrder.addEventListener('change', (e) => handleSortChange(e.target.value));
+
+    // Mobile sort button and menu
+    allDom.sortToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        allDom.sortMenuMobile.classList.toggle('hidden');
+    });
+    allDom.sortMenuMobile.addEventListener('click', (e) => {
+        const button = e.target.closest('.sort-option-mobile');
+        if (button) {
+            handleSortChange(button.dataset.value);
+            allDom.sortMenuMobile.classList.add('hidden'); // Hide menu after selection
+        }
+    });
+
+    // 4. Interactive Mobile Search Logic
+    let isMobileSearchActive = false;
+
+    const toggleMobileSearch = (forceClose = false) => {
+        // Determine the new state. If forcing close, it must be false.
+        const shouldBeActive = forceClose ? false : !isMobileSearchActive;
+        
+        if (isMobileSearchActive === shouldBeActive) return; // Do nothing if state is already correct
+
+        isMobileSearchActive = shouldBeActive;
+
+        allDom.searchWrapper.classList.toggle('w-0', !isMobileSearchActive);
+        allDom.searchWrapper.classList.toggle('w-full', isMobileSearchActive);
+        allDom.searchWrapper.classList.toggle('opacity-0', !isMobileSearchActive);
+        
+        allDom.roomSelectorWrapper.classList.toggle('w-full', !isMobileSearchActive);
+        allDom.roomSelectorWrapper.classList.toggle('w-10', isMobileSearchActive);
+        allDom.roomSelectorWrapper.querySelector('select').classList.toggle('hidden', isMobileSearchActive);
+        
+        if (isMobileSearchActive) {
+            allDom.searchBar.focus();
+        } else {
+            allDom.searchBar.blur();
+            // Only clear search and re-render if the value has changed
+            if (allDom.searchBar.value !== '') {
+                allDom.searchBar.value = '';
+                currentFilter.search = '';
+                renderPosts();
+            }
+        }
+    };
+
+    // Listener for the mobile search icon
+    allDom.searchToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMobileSearch();
+    });
+
+    // Listener for the room dropdown wrapper, which acts as a 'back' button
+    allDom.roomSelectorWrapper.addEventListener('click', (e) => {
+        // Only trigger if search is active and on mobile
+        if (isMobileSearchActive && window.innerWidth < 768) {
+            const iconElement = allDom.roomSelectorWrapper.querySelector('.absolute.left-0');
+            // Check if the click was on the icon area
+            if(iconElement && iconElement.contains(e.target)){
+                e.preventDefault(); // Prevent dropdown from opening
+                toggleMobileSearch(true); // Force close
+            }
+        }
+    });
+
+    // 5. Global Click Listeners to Close Menus
+    document.addEventListener('click', (e) => {
+        // Close color options menu
+        if (allDom.colorOptions && !allDom.colorThemeBtn.contains(e.target) && !allDom.colorOptions.contains(e.target)) {
+            allDom.colorOptions.classList.add('hidden');
+        }
+        
+        // Close sort menu
+        if (allDom.sortMenuMobile && !allDom.sortToggleBtn.contains(e.target) && !allDom.sortMenuMobile.contains(e.target)) {
+            allDom.sortMenuMobile.classList.add('hidden');
+        }
+        
+        // Close mobile search bar if clicking outside the main controls container
+        if (isMobileSearchActive && !e.target.closest('#controls-container')) {
+            toggleMobileSearch(true); // Force close
+        }
+    });
 }
 
 // Signs the user in anonymously and then loads posts
@@ -300,7 +405,7 @@ function loadPosts() {
 // Renders the current list of `allPosts` to the DOM after filtering/sorting
 function renderPosts() {
     let postsToRender = [...allPosts];
-    const searchTerm = allDom.searchBar.value.toLowerCase() || allDom.searchBarDesktop.value.toLowerCase();
+    const searchTerm = allDom.searchBar.value.toLowerCase();
     if (searchTerm) { postsToRender = postsToRender.filter(p => p.content?.toLowerCase().includes(searchTerm)); }
     if (currentFilter.category !== 'all') { postsToRender = postsToRender.filter(p => p.category === currentFilter.category); }
     postsToRender.sort((a, b) => {
