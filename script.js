@@ -240,7 +240,7 @@ async function handlePostSubmit(e) {
             fileType = file.type;
 
             // IMPORTANT: Replace this with your actual Worker URL
-            const workerUrl = 'https://freedom-uploader.ahsan-amal0987.workers.dev/';
+            const workerUrl = 'https://freedom-uploader.ahsan-amal0987.workers.dev';
 
             // We send the file itself as the body and the name in a header
             const response = await fetch(workerUrl, {
