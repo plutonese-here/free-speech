@@ -231,46 +231,41 @@ function setupEventListeners() {
     function closeMobileSearch() {
         if (!isMobileSearchActive) return;
         isMobileSearchActive = false;
-        
-        // 1. Grow Room selector, Shrink Search wrapper
-        allDom.mobileRoomSelectorWrapper.classList.remove('w-10');
-        allDom.mobileRoomSelectorWrapper.classList.add('flex-grow');
+
         allDom.mobileSearchWrapper.classList.add('w-0', 'opacity-0');
         allDom.mobileSearchWrapper.classList.remove('flex-grow');
+        allDom.mobileRoomSelectorWrapper.classList.remove('w-10');
+        allDom.mobileRoomSelectorWrapper.classList.add('flex-grow');
         
-        // 2. Hide Search button, show select dropdown
         allDom.mobileSearchBtn.classList.remove('bg-primary');
-        allDom.mobileCategorySelect.style.opacity = 1;
-        allDom.mobileRoomArrow.style.opacity = 1;
-        allDom.mobileRoomSelectorWrapper.querySelector('svg').style.opacity = 1;
 
-        // 3. Clear search value and re-render posts
-        if(allDom.searchBarMobile.value) {
+        // Show the room selector elements
+        allDom.mobileCategorySelect.classList.remove('hidden');
+        allDom.mobileRoomArrow.classList.remove('hidden');
+
+        if (allDom.searchBarMobile.value) {
             allDom.searchBarMobile.value = '';
             currentFilter.search = '';
             renderPosts();
         }
     }
-    
+
     function openMobileSearch() {
         if (isMobileSearchActive) return;
         isMobileSearchActive = true;
         
-        // 1. Shrink Room selector, Grow Search wrapper
         allDom.mobileRoomSelectorWrapper.classList.add('w-10');
         allDom.mobileRoomSelectorWrapper.classList.remove('flex-grow');
         allDom.mobileSearchWrapper.classList.remove('w-0', 'opacity-0');
         allDom.mobileSearchWrapper.classList.add('flex-grow');
-        
-        // 2. Highlight Search button, hide select dropdown
-        allDom.mobileSearchBtn.classList.add('bg-primary');
-        allDom.mobileCategorySelect.style.opacity = 0;
-        allDom.mobileRoomArrow.style.opacity = 0;
-        // Keep the main room icon visible, just change what it does
-        allDom.mobileRoomSelectorWrapper.querySelector('svg').style.opacity = 1;
 
-        // 3. Focus the search input
-        setTimeout(() => allDom.searchBarMobile.focus(), 300); // Wait for transition to finish
+        allDom.mobileSearchBtn.classList.add('bg-primary');
+        
+        // Hide the room selector elements
+        allDom.mobileCategorySelect.classList.add('hidden');
+        allDom.mobileRoomArrow.classList.add('hidden');
+        
+        setTimeout(() => allDom.searchBarMobile.focus(), 300);
     }
 
     allDom.mobileSearchBtn.addEventListener('click', (e) => {
@@ -282,13 +277,24 @@ function setupEventListeners() {
         }
     });
     
-    allDom.mobileRoomSelectorWrapper.addEventListener('click', (e) => {
-        if(isMobileSearchActive) {
-            e.preventDefault(); // Stop dropdown from opening
+    // Use the ICON element directly as the click target to close search
+    const roomIcon = document.getElementById('mobile-room-icon');
+    if (roomIcon) {
+        roomIcon.parentElement.addEventListener('click', (e) => {
+             if(isMobileSearchActive) {
+                e.preventDefault(); // Stop dropdown from opening
+                closeMobileSearch();
+            }
+        });
+    }
+
+    // This section remains the same
+    document.addEventListener('click', (e) => {
+        // ... (your existing code for closing menus)
+        if (isMobileSearchActive && !e.target.closest('#mobile-controls-container')) {
             closeMobileSearch();
         }
     });
-    
     // --- Global Click Listeners for Closing Menus ---
     document.addEventListener('click', (e) => {
         if (allDom.colorOptions && !allDom.colorThemeBtn.contains(e.target)) {
