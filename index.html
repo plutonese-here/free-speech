@@ -57,58 +57,61 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 py-8 grid grid-cols-1 md:grid-cols-12 gap-8">
         <!-- Main Content -->
         <main class="md:col-span-8 lg:col-span-9">
-            <!-- Unified Controls: Mobile & Desktop -->
-            <div id="controls-container" class="mb-4 md:flex md:items-center md:gap-4 md:mb-6">
-
-                <!-- Left Side: Room Selector -->
-                <div id="room-selector-wrapper" class="relative w-full md:flex-grow mb-3 md:mb-0 transition-all duration-300">
-                    <!-- Icon for the dropdown -->
+            <!-- Desktop Controls -->
+            <div class="hidden md:flex items-center gap-4 mb-6">
+                <!-- Desktop Search Bar -->
+                <div class="relative flex-grow">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <input type="search" id="searchBarDesktop" placeholder="Search posts..." class="w-full p-2 pl-10 card rounded-full border-transparent focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <!-- Desktop Sort Select -->
+                <div class="relative flex-shrink-0">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9M3 12h9M3 16h13M3 20h9" /></svg>
+                    </div>
+                    <select id="sortOrder" class="w-full pl-10 pr-4 py-2 card rounded-full border-transparent focus:outline-none focus:ring-2 focus:ring-primary appearance-none">
+                        <option value="recent">Sort: Most Recent</option>
+                        <option value="upvoted">Sort: Most Upvoted</option>
+                        <option value="commented">Sort: Most Commented</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Mobile Controls -->
+            <div id="mobile-controls-container" class="md:hidden flex items-center gap-2 mb-4">
+                <!-- Room Selector (collapsible) -->
+                <div id="mobile-room-selector-wrapper" class="relative flex-grow transition-all duration-300 ease-in-out">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg id="mobile-room-icon" class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h2.586a1 1 0 01.707.293l1.414 1.414a1 1 0 00.707.293H15" />
                         </svg>
                     </div>
-                    <!-- The actual select dropdown -->
                     <select id="mobileCategorySelect" class="w-full card pl-10 pr-8 py-2 rounded-full border-transparent focus:outline-none focus:ring-2 focus:ring-primary appearance-none">
-                        <!-- Mobile categories will be injected here -->
+                        <!-- Mobile categories are injected here -->
                     </select>
-                    <!-- Dropdown arrow -->
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[var(--icon-color)]">
                         <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                     </div>
                 </div>
 
-                <!-- Right Side: Search, Sort & Desktop Search Bar -->
-                <div class="flex items-center gap-2 justify-end md:justify-start flex-shrink-0">
-                    <!-- Search Bar (hidden on mobile initially) -->
-                    <div id="search-wrapper" class="relative w-0 md:w-full md:flex-grow opacity-0 md:opacity-100 transition-all duration-300">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
-                        </div>
-                        <input type="search" id="searchBar" placeholder="Search posts..." class="w-full p-2 pl-10 card rounded-full border-transparent focus:outline-none focus:ring-2 focus:ring-primary">
-                    </div>
-                    
-                    <!-- Search Toggle Button (Mobile Only) -->
-                    <button id="search-toggle-btn" class="w-10 h-10 card rounded-full flex items-center justify-center md:hidden transition-colors">
+                <!-- Mobile Search (collapsible) -->
+                <div id="mobile-search-wrapper" class="relative flex-grow w-0 opacity-0 transition-all duration-300 ease-in-out">
+                    <input type="search" id="searchBarMobile" placeholder="Search..." class="w-full p-2 card rounded-full border-transparent focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <button id="mobile-search-btn" class="w-10 h-10 card rounded-full flex items-center justify-center transition-colors">
                         <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
                     </button>
-                    
-                    <!-- Sort Button & Dropdown -->
                     <div class="relative">
-                        <button id="sort-toggle-btn" class="w-10 h-10 card rounded-full flex items-center justify-center transition-colors">
+                        <button id="mobile-sort-btn" class="w-10 h-10 card rounded-full flex items-center justify-center transition-colors">
                             <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9M3 12h9M3 16h13M3 20h9" /></svg>
                         </button>
-                        <!-- Desktop Only Select -->
-                        <select id="sortOrder" class="hidden absolute right-0 top-12 md:block card w-48 rounded-md p-2 border-transparent focus:outline-none focus:ring-2 focus:ring-primary z-10">
-                            <option value="recent">Sort: Most Recent</option>
-                            <option value="upvoted">Sort: Most Upvoted</option>
-                            <option value="commented">Sort: Most Commented</option>
-                        </select>
-                        <!-- Mobile Only Menu -->
-                        <div id="sort-menu-mobile" class="hidden dropdown-menu absolute right-0 top-12 w-48 rounded-md shadow-lg py-1 z-10 md:hidden">
-                            <button data-value="recent" class="sort-option-mobile block w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)]">Most Recent</button>
-                            <button data-value="upvoted" class="sort-option-mobile block w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)]">Most Upvoted</button>
-                            <button data-value="commented" class="sort-option-mobile block w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)]">Most Commented</button>
+                        <div id="sort-menu-mobile" class="hidden dropdown-menu absolute right-0 top-12 w-48 rounded-md shadow-lg py-1 z-10">
+                            <!-- Mobile sort options injected here -->
                         </div>
                     </div>
                 </div>

@@ -39,10 +39,15 @@ function main() {
 
     // Cache all DOM elements for performance
     allDom = {
+        // --- Global & Theme ---
         themeToggle: document.getElementById('themeToggle'),
         themeIcon: document.getElementById('themeIcon'),
         html: document.documentElement,
         body: document.body,
+        colorThemeBtn: document.getElementById('colorThemeBtn'),
+        colorOptions: document.getElementById('colorOptions'),
+
+        // --- Main Post & Modal ---
         newPostBtn: document.getElementById('newPostBtn'),
         postModal: document.getElementById('postModal'),
         closeModalBtn: document.getElementById('closeModalBtn'),
@@ -57,18 +62,24 @@ function main() {
         postBtnIcon: document.getElementById('postBtnIcon'),
         postBtnLoader: document.getElementById('postBtnLoader'),
         postFeed: document.getElementById('postFeed'),
-        searchBar: document.getElementById('searchBar'),
-        searchWrapper: document.getElementById('search-wrapper'),
-        searchToggleBtn: document.getElementById('search-toggle-btn'),
-        roomSelectorWrapper: document.getElementById('room-selector-wrapper'),
-        sortToggleBtn: document.getElementById('sort-toggle-btn'),
-        sortMenuMobile: document.getElementById('sort-menu-mobile'),
-        sortOrder: document.getElementById('sortOrder'),
-        categoryList: document.getElementById('categoryList'),
-        mobileCategorySelect: document.getElementById('mobileCategorySelect'),
         categoryTitle: document.getElementById('categoryTitle'),
-        colorThemeBtn: document.getElementById('colorThemeBtn'),
-        colorOptions: document.getElementById('colorOptions'),
+
+        // --- Desktop Controls ---
+        searchBarDesktop: document.getElementById('searchBarDesktop'),
+        sortOrder: document.getElementById('sortOrder'),
+        
+        // --- Sidebar Category List ---
+        categoryList: document.getElementById('categoryList'),
+        
+        // --- Mobile Controls ---
+        mobileControlsContainer: document.getElementById('mobile-controls-container'),
+        mobileCategorySelect: document.getElementById('mobileCategorySelect'),
+        mobileRoomSelectorWrapper: document.getElementById('mobile-room-selector-wrapper'),
+        mobileSearchWrapper: document.getElementById('mobile-search-wrapper'),
+        searchBarMobile: document.getElementById('searchBarMobile'),
+        mobileSearchBtn: document.getElementById('mobile-search-btn'),
+        mobileSortBtn: document.getElementById('mobile-sort-btn'),
+        sortMenuMobile: document.getElementById('sort-menu-mobile')
     };
     
     // Run all setup functions
@@ -141,142 +152,147 @@ function setupCategories() {
 
 // Attaches all necessary event listeners to the DOM
 function setupEventListeners() {
-    // --- Unchanged Listeners (Theming, New Post Modal) ---
+    // --- Theming & Main Modal Listeners (Unchanged) ---
     allDom.themeToggle.addEventListener('click', toggleTheme);
     allDom.colorThemeBtn.addEventListener('click', (e) => { e.stopPropagation(); allDom.colorOptions.classList.toggle('hidden'); });
-    allDom.newPostBtn.addEventListener('click', () => {
-        allDom.postAuthor.value = userProfile.name;
-        openModal(allDom.postModal);
-    });
+    allDom.newPostBtn.addEventListener('click', () => { allDom.postAuthor.value = userProfile.name; openModal(allDom.postModal); });
     allDom.closeModalBtn.addEventListener('click', () => closeModal(allDom.postModal));
     allDom.postModal.querySelector('.modal-backdrop').addEventListener('click', () => closeModal(allDom.postModal));
     allDom.postForm.addEventListener('submit', handlePostSubmit);
-    allDom.fileUpload.addEventListener('change', () => {
-        if (allDom.fileUpload.files.length > 0) allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name;
-    });
-
-    // --- Core Feed Interaction ---
+    allDom.fileUpload.addEventListener('change', () => { if (allDom.fileUpload.files.length > 0) allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name; });
     allDom.postFeed.addEventListener('click', handlePostFeedClick);
 
-    // --- NEW Unified Controls Logic ---
-
-    // 1. Unified Search Bar
-    allDom.searchBar.addEventListener('input', (e) => {
+    // --- Desktop Controls ---
+    allDom.searchBarDesktop.addEventListener('input', (e) => {
         currentFilter.search = e.target.value.toLowerCase();
         renderPosts();
     });
+    allDom.sortOrder.addEventListener('change', (e) => {
+        currentFilter.sort = e.target.value;
+        renderPosts();
+    });
 
-    // 2. Room / Category Selection
+    // --- Shared Logic ---
     const handleCategoryChange = (catId) => {
         currentFilter.category = catId;
-        const cat = categories.find(c => c.id === currentFilter.category);
+        const cat = categories.find(c => c.id === catId);
         allDom.categoryTitle.textContent = cat ? cat.name : "All Posts";
-        
         document.querySelectorAll('#categoryList a').forEach(a => a.classList.remove('category-selected'));
-        const link = document.querySelector(`#categoryList a[data-catid="${catId}"]`);
-        if (link) {
-            link.classList.add('category-selected');
-        }
-        
+        document.querySelector(`#categoryList a[data-catid="${catId}"]`)?.classList.add('category-selected');
         allDom.mobileCategorySelect.value = catId;
         renderPosts();
     };
+
+    // --- Sidebar List Listener ---
     allDom.categoryList.addEventListener('click', (e) => {
         e.preventDefault();
         const link = e.target.closest('a[data-catid]');
         if (link) handleCategoryChange(link.dataset.catid);
     });
+
+    // --- Mobile Controls ---
     allDom.mobileCategorySelect.addEventListener('change', (e) => handleCategoryChange(e.target.value));
 
-    // 3. Sorting Logic (Desktop and Mobile)
-    const handleSortChange = (sortValue) => {
-        currentFilter.sort = sortValue;
-        allDom.sortOrder.value = sortValue; // Keep desktop <select> in sync
+    allDom.searchBarMobile.addEventListener('input', (e) => {
+        currentFilter.search = e.target.value.toLowerCase();
         renderPosts();
-    };
+    });
 
-    // Desktop sort dropdown
-    allDom.sortOrder.addEventListener('change', (e) => handleSortChange(e.target.value));
-
-    // Mobile sort button and menu
-    allDom.sortToggleBtn.addEventListener('click', (e) => {
+    // Populate and handle the mobile sort menu
+    const sortOptions = { recent: 'Most Recent', upvoted: 'Most Upvoted', commented: 'Most Commented' };
+    allDom.sortMenuMobile.innerHTML = ''; // Clear any old options
+    for (const [value, text] of Object.entries(sortOptions)) {
+        const button = document.createElement('button');
+        button.dataset.value = value;
+        button.className = 'sort-option-mobile block w-full text-left px-4 py-2 text-sm hover:bg-[var(--border-color)]';
+        button.textContent = text;
+        allDom.sortMenuMobile.appendChild(button);
+    }
+    
+    allDom.mobileSortBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         allDom.sortMenuMobile.classList.toggle('hidden');
     });
+
     allDom.sortMenuMobile.addEventListener('click', (e) => {
         const button = e.target.closest('.sort-option-mobile');
         if (button) {
-            handleSortChange(button.dataset.value);
-            allDom.sortMenuMobile.classList.add('hidden'); // Hide menu after selection
-        }
-    });
-
-    // 4. Interactive Mobile Search Logic
-    let isMobileSearchActive = false;
-
-    const toggleMobileSearch = (forceClose = false) => {
-        // Determine the new state. If forcing close, it must be false.
-        const shouldBeActive = forceClose ? false : !isMobileSearchActive;
-        
-        if (isMobileSearchActive === shouldBeActive) return; // Do nothing if state is already correct
-
-        isMobileSearchActive = shouldBeActive;
-
-        allDom.searchWrapper.classList.toggle('w-0', !isMobileSearchActive);
-        allDom.searchWrapper.classList.toggle('w-full', isMobileSearchActive);
-        allDom.searchWrapper.classList.toggle('opacity-0', !isMobileSearchActive);
-        
-        allDom.roomSelectorWrapper.classList.toggle('w-full', !isMobileSearchActive);
-        allDom.roomSelectorWrapper.classList.toggle('w-10', isMobileSearchActive);
-        allDom.roomSelectorWrapper.querySelector('select').classList.toggle('hidden', isMobileSearchActive);
-        
-        if (isMobileSearchActive) {
-            allDom.searchBar.focus();
-        } else {
-            allDom.searchBar.blur();
-            // Only clear search and re-render if the value has changed
-            if (allDom.searchBar.value !== '') {
-                allDom.searchBar.value = '';
-                currentFilter.search = '';
-                renderPosts();
-            }
-        }
-    };
-
-    // Listener for the mobile search icon
-    allDom.searchToggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMobileSearch();
-    });
-
-    // Listener for the room dropdown wrapper, which acts as a 'back' button
-    allDom.roomSelectorWrapper.addEventListener('click', (e) => {
-        // Only trigger if search is active and on mobile
-        if (isMobileSearchActive && window.innerWidth < 768) {
-            const iconElement = allDom.roomSelectorWrapper.querySelector('.absolute.left-0');
-            // Check if the click was on the icon area
-            if(iconElement && iconElement.contains(e.target)){
-                e.preventDefault(); // Prevent dropdown from opening
-                toggleMobileSearch(true); // Force close
-            }
-        }
-    });
-
-    // 5. Global Click Listeners to Close Menus
-    document.addEventListener('click', (e) => {
-        // Close color options menu
-        if (allDom.colorOptions && !allDom.colorThemeBtn.contains(e.target) && !allDom.colorOptions.contains(e.target)) {
-            allDom.colorOptions.classList.add('hidden');
-        }
-        
-        // Close sort menu
-        if (allDom.sortMenuMobile && !allDom.sortToggleBtn.contains(e.target) && !allDom.sortMenuMobile.contains(e.target)) {
+            currentFilter.sort = button.dataset.value;
+            allDom.sortOrder.value = button.dataset.value; // Sync with desktop
+            renderPosts();
             allDom.sortMenuMobile.classList.add('hidden');
         }
+    });
+
+    // *** The Mobile Search Animation Logic ***
+    let isMobileSearchActive = false;
+
+    function closeMobileSearch() {
+        if (!isMobileSearchActive) return;
+        isMobileSearchActive = false;
         
-        // Close mobile search bar if clicking outside the main controls container
-        if (isMobileSearchActive && !e.target.closest('#controls-container')) {
-            toggleMobileSearch(true); // Force close
+        // 1. Grow Room selector, Shrink Search wrapper
+        allDom.mobileRoomSelectorWrapper.classList.remove('w-10');
+        allDom.mobileRoomSelectorWrapper.classList.add('flex-grow');
+        allDom.mobileSearchWrapper.classList.add('w-0', 'opacity-0');
+        allDom.mobileSearchWrapper.classList.remove('flex-grow');
+        
+        // 2. Hide Search button, show select dropdown
+        allDom.mobileSearchBtn.classList.remove('bg-primary');
+        allDom.mobileCategorySelect.style.display = 'block';
+
+        // 3. Clear search value and re-render posts
+        if(allDom.searchBarMobile.value) {
+            allDom.searchBarMobile.value = '';
+            currentFilter.search = '';
+            renderPosts();
+        }
+    }
+    
+    function openMobileSearch() {
+        if (isMobileSearchActive) return;
+        isMobileSearchActive = true;
+        
+        // 1. Shrink Room selector, Grow Search wrapper
+        allDom.mobileRoomSelectorWrapper.classList.add('w-10');
+        allDom.mobileRoomSelectorWrapper.classList.remove('flex-grow');
+        allDom.mobileSearchWrapper.classList.remove('w-0', 'opacity-0');
+        allDom.mobileSearchWrapper.classList.add('flex-grow');
+        
+        // 2. Highlight Search button, hide select dropdown
+        allDom.mobileSearchBtn.classList.add('bg-primary');
+        allDom.mobileCategorySelect.style.display = 'none';
+
+        // 3. Focus the search input
+        setTimeout(() => allDom.searchBarMobile.focus(), 300); // Wait for transition to finish
+    }
+
+    allDom.mobileSearchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isMobileSearchActive) {
+            closeMobileSearch();
+        } else {
+            openMobileSearch();
+        }
+    });
+    
+    allDom.mobileRoomSelectorWrapper.addEventListener('click', (e) => {
+        if(isMobileSearchActive) {
+            e.preventDefault(); // Stop dropdown from opening
+            closeMobileSearch();
+        }
+    });
+    
+    // --- Global Click Listeners for Closing Menus ---
+    document.addEventListener('click', (e) => {
+        if (allDom.colorOptions && !allDom.colorThemeBtn.contains(e.target)) {
+            allDom.colorOptions.classList.add('hidden');
+        }
+        if (allDom.sortMenuMobile && !allDom.mobileSortBtn.contains(e.target)) {
+            allDom.sortMenuMobile.classList.add('hidden');
+        }
+        if (isMobileSearchActive && !e.target.closest('#mobile-controls-container')) {
+            closeMobileSearch();
         }
     });
 }
