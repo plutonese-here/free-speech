@@ -90,7 +90,7 @@ function setupIdentity() {
 function setupTheme() {
     const savedColor = localStorage.getItem('colorTheme') || 'warm';
     applyColorTheme(savedColor);
-    const isDark = localStorage.getItem('theme') === 'dark';
+    const isDark = localStorage.getItem('theme') !== 'light';
     updateThemeUI(isDark);
 }
 
