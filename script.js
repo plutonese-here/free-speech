@@ -79,7 +79,8 @@ function main() {
         searchBarMobile: document.getElementById('searchBarMobile'),
         mobileSearchBtn: document.getElementById('mobile-search-btn'),
         mobileSortBtn: document.getElementById('mobile-sort-btn'),
-        sortMenuMobile: document.getElementById('sort-menu-mobile')
+        sortMenuMobile: document.getElementById('sort-menu-mobile'),
+        mobileRoomArrow: document.getElementById('mobile-room-arrow')
     };
     
     // Run all setup functions
@@ -239,7 +240,9 @@ function setupEventListeners() {
         
         // 2. Hide Search button, show select dropdown
         allDom.mobileSearchBtn.classList.remove('bg-primary');
-        allDom.mobileCategorySelect.style.display = 'block';
+        allDom.mobileCategorySelect.style.opacity = 1;
+        allDom.mobileRoomArrow.style.opacity = 1;
+        allDom.mobileRoomSelectorWrapper.querySelector('svg').style.opacity = 1;
 
         // 3. Clear search value and re-render posts
         if(allDom.searchBarMobile.value) {
@@ -261,7 +264,10 @@ function setupEventListeners() {
         
         // 2. Highlight Search button, hide select dropdown
         allDom.mobileSearchBtn.classList.add('bg-primary');
-        allDom.mobileCategorySelect.style.display = 'none';
+        allDom.mobileCategorySelect.style.opacity = 0;
+        allDom.mobileRoomArrow.style.opacity = 0;
+        // Keep the main room icon visible, just change what it does
+        allDom.mobileRoomSelectorWrapper.querySelector('svg').style.opacity = 1;
 
         // 3. Focus the search input
         setTimeout(() => allDom.searchBarMobile.focus(), 300); // Wait for transition to finish
@@ -421,7 +427,7 @@ function loadPosts() {
 // Renders the current list of `allPosts` to the DOM after filtering/sorting
 function renderPosts() {
     let postsToRender = [...allPosts];
-    const searchTerm = allDom.searchBar.value.toLowerCase();
+    const searchTerm = (allDom.searchBarDesktop.value || allDom.searchBarMobile.value).toLowerCase();
     if (searchTerm) { postsToRender = postsToRender.filter(p => p.content?.toLowerCase().includes(searchTerm)); }
     if (currentFilter.category !== 'all') { postsToRender = postsToRender.filter(p => p.category === currentFilter.category); }
     postsToRender.sort((a, b) => {
