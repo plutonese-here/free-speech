@@ -593,18 +593,17 @@ function createCommentElement(comment) {
 // This is the complete and corrected function.
 function handlePostFeedClick(e) {
     // --- Lightbox Click Logic ---
-    const lightboxTrigger = e.target.closest('.open-lightbox');
-    if (lightboxTrigger) {
+    const mediaElement = e.target.closest('[data-post-id]');
+    if (mediaElement && e.target.closest('.open-lightbox')) {
         e.preventDefault();
         
-        // The data is directly on the element that was found, so we just use its dataset.
-        // querySelector is no longer needed here.
-        const { postId, mediaIndex } = lightboxTrigger.dataset;
+        // Read the dataset directly from the media element (img/video)
+        const { postId, mediaIndex } = mediaElement.dataset;
         
         if (postId !== undefined && mediaIndex !== undefined) {
             openLightbox(postId, mediaIndex);
         }
-        return; // Important: Stop processing so we don't treat it as another click.
+        return; // Stop after handling lightbox click
     }
 
     // --- Other Clicks ---
