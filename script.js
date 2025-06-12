@@ -73,16 +73,14 @@ function main() {
         
         // --- Mobile Controls ---
         mobileControlsContainer: document.getElementById('mobile-controls-container'),
-        mobileControlsContainer: document.getElementById('mobile-controls-container'),
         mobileCategorySelect: document.getElementById('mobileCategorySelect'),
-        mobileRoomWrapper: document.getElementById('mobile-room-wrapper'), // Renamed from selector-wrapper
-        mobileRoomArrow: document.getElementById('mobile-room-arrow'), // ID is on the div now
+        mobileCategorySelectWrapper: document.getElementById('mobile-category-select-wrapper'),
+        mobileRoomBtn: document.getElementById('mobile-room-btn'),
         mobileSearchWrapper: document.getElementById('mobile-search-wrapper'),
         searchBarMobile: document.getElementById('searchBarMobile'),
         mobileSearchBtn: document.getElementById('mobile-search-btn'),
         mobileSortBtn: document.getElementById('mobile-sort-btn'),
-        sortMenuMobile: document.getElementById('sort-menu-mobile'),
-        mobileRoomArrow: document.getElementById('mobile-room-arrow')
+        sortMenuMobile: document.getElementById('sort-menu-mobile')
     };
     
     // Run all setup functions
@@ -155,7 +153,7 @@ function setupCategories() {
 
 // Attaches all necessary event listeners to the DOM
 function setupEventListeners() {
-    // --- Theming & Main Modal Listeners ---
+    // --- All top-level listeners are the same ---
     allDom.themeToggle.addEventListener('click', toggleTheme);
     allDom.colorThemeBtn.addEventListener('click', (e) => { e.stopPropagation(); allDom.colorOptions.classList.toggle('hidden'); });
     allDom.newPostBtn.addEventListener('click', () => { allDom.postAuthor.value = userProfile.name; openModal(allDom.postModal); });
@@ -164,12 +162,9 @@ function setupEventListeners() {
     allDom.postForm.addEventListener('submit', handlePostSubmit);
     allDom.fileUpload.addEventListener('change', () => { if (allDom.fileUpload.files.length > 0) allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name; });
     allDom.postFeed.addEventListener('click', handlePostFeedClick);
-
-    // --- Desktop Controls ---
     allDom.searchBarDesktop.addEventListener('input', (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); });
     allDom.sortOrder.addEventListener('change', (e) => { currentFilter.sort = e.target.value; renderPosts(); });
 
-    // --- Shared Logic for Changing Categories ---
     const handleCategoryChange = (catId) => {
         currentFilter.category = catId;
         const cat = categories.find(c => c.id === catId);
@@ -184,7 +179,6 @@ function setupEventListeners() {
     allDom.mobileCategorySelect.addEventListener('change', (e) => handleCategoryChange(e.target.value));
     allDom.searchBarMobile.addEventListener('input', (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); });
     
-    // --- Mobile Sort ---
     const sortOptions = { recent: 'Most Recent', upvoted: 'Most Upvoted', commented: 'Most Commented' };
     allDom.sortMenuMobile.innerHTML = '';
     for (const [value, text] of Object.entries(sortOptions)) {
@@ -205,29 +199,27 @@ function setupEventListeners() {
         }
     });
 
-    // --- The FINAL Mobile Search Animation Logic ---
+    // *** FINAL SIMPLIFIED MOBILE SEARCH LOGIC ***
     let isMobileSearchActive = false;
+
     function setMobileSearchState(active) {
         if (isMobileSearchActive === active) return;
         isMobileSearchActive = active;
 
+        // TOGGLE VISIBILITY of the two main components
+        allDom.mobileRoomBtn.classList.toggle('hidden', !active);
+        allDom.mobileCategorySelectWrapper.classList.toggle('hidden', active);
+        
+        // GROW/SHRINK the search input
         allDom.mobileSearchWrapper.classList.toggle('w-0', !active);
         allDom.mobileSearchWrapper.classList.toggle('opacity-0', !active);
         allDom.mobileSearchWrapper.classList.toggle('flex-grow', active);
-
-        allDom.mobileRoomWrapper.classList.toggle('w-10', active);
-        allDom.mobileRoomWrapper.classList.toggle('flex-grow', !active);
         
-        allDom.mobileCategorySelect.classList.toggle('hidden', active);
-        allDom.mobileRoomArrow.classList.toggle('hidden', active);
-
         allDom.mobileSearchBtn.classList.toggle('bg-primary', active);
 
         if (active) {
-            allDom.mobileRoomWrapper.classList.add('card', 'rounded-full');
             setTimeout(() => allDom.searchBarMobile.focus(), 300);
         } else {
-            allDom.mobileRoomWrapper.classList.remove('card', 'rounded-full');
             if (allDom.searchBarMobile.value) {
                 allDom.searchBarMobile.value = '';
                 currentFilter.search = '';
@@ -235,20 +227,18 @@ function setupEventListeners() {
             }
         }
     }
-
+    
     allDom.mobileSearchBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        setMobileSearchState(!isMobileSearchActive);
-    });
-    
-    allDom.mobileRoomWrapper.addEventListener('click', (e) => {
-        if(isMobileSearchActive) {
-            e.preventDefault();
-            setMobileSearchState(false);
-        }
+        setMobileSearchState(true);
     });
 
-    // --- Final Global Click Listener for Closing Menus ---
+    allDom.mobileRoomBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setMobileSearchState(false);
+    });
+    
+    // Final Global Click Listener
     document.addEventListener('click', (e) => {
         if (!allDom.colorThemeBtn.contains(e.target) && !allDom.colorOptions.contains(e.target)) {
             allDom.colorOptions.classList.add('hidden');

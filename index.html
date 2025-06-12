@@ -81,24 +81,29 @@
 
             <!-- Mobile Controls -->
             <div id="mobile-controls-container" class="md:hidden flex items-center gap-2 mb-4">
-                <!-- START: This is the new Room Selector/Back Button block -->
-                <div id="mobile-room-wrapper" class="relative flex-grow transition-all duration-300 ease-in-out">
-                    <!-- The icon that is ALWAYS visible -->
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex pt-2 pl-3">
-                        <svg id="mobile-room-icon" class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- START: This is the Room Selector/Back Button block -->
+                <!-- 1. The "Back" Button (Starts hidden) -->
+                <button id="mobile-room-btn" class="hidden w-10 h-10 card rounded-full flex-shrink-0 flex items-center justify-center transition-colors">
+                    <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h2.586a1 1 0 01.707.293l1.414 1.414a1 1 0 00.707.293H15" />
+                    </svg>
+                </button>
+
+                <!-- 2. The Select Dropdown Wrapper -->
+                <div id="mobile-category-select-wrapper" class="relative flex-grow transition-all duration-300 ease-in-out">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                        <svg class="w-5 h-5 text-[var(--icon-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h2.586a1 1 0 01.707.293l1.414 1.414a1 1 0 00.707.293H15" />
                         </svg>
                     </div>
-                    <!-- The select dropdown that will be hidden/shown -->
-                    <select id="mobileCategorySelect" class="w-full card pl-10 pr-8 py-2 rounded-full border-transparent focus:outline-none focus:ring-2 focus:ring-primary appearance-none" style="padding-right: 5rem;">
-                        <!-- Categories will be injected here -->
+                    <select id="mobileCategorySelect" class="w-full card pl-12 pr-8 py-2 rounded-full border-transparent focus:outline-none focus:ring-2 focus:ring-primary appearance-none">
+                        <!-- Categories injected here -->
                     </select>
-                    <!-- The arrow for the dropdown that will be hidden/shown -->
-                    <div id="mobile-room-arrow" class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[var(--icon-color)]">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[var(--icon-color)]">
                         <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                     </div>
                 </div>
-                <!-- END: New Room Selector block -->
+                <!-- END: Room Selector block -->
 
                 <!-- Mobile Search (collapsible) -->
                 <div id="mobile-search-wrapper" class="relative flex-grow w-0 opacity-0 transition-all duration-300 ease-in-out">
