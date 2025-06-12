@@ -586,33 +586,44 @@ function createCommentElement(comment) {
 }
 
 // Handles all clicks on the post feed using event delegation
+// This is the complete and corrected function.
 function handlePostFeedClick(e) {
-    // Lightbox Click
+    // --- Lightbox Click Logic ---
     const lightboxTrigger = e.target.closest('.open-lightbox');
     if (lightboxTrigger) {
         e.preventDefault();
-        const mediaElement = lightboxTrigger.querySelector('[data-post-id]');
-        if (mediaElement) {
-            const { postId, mediaIndex } = mediaElement.dataset;
+        
+        // The data is directly on the element that was found, so we just use its dataset.
+        // querySelector is no longer needed here.
+        const { postId, mediaIndex } = lightboxTrigger.dataset;
+        
+        if (postId !== undefined && mediaIndex !== undefined) {
             openLightbox(postId, mediaIndex);
         }
-        return; // Stop further processing
+        return; // Important: Stop processing so we don't treat it as another click.
     }
 
-    // Regular Post Interaction Click
+    // --- Other Clicks ---
     const postEl = e.target.closest('[data-id]');
     if (!postEl) return;
 
     const postId = postEl.dataset.id;
-    if (e.target.closest('.upvote-btn')) handleVote(postId, 'upvotes');
-    else if (e.target.closest('.downvote-btn')) handleVote(postId, 'downvotes');
-    else if (e.target.closest('.comment-btn')) postEl.querySelector('.comment-section').classList.toggle('hidden');
-    else if (e.target.closest('.comment-form')) {
+    if (e.target.closest('.upvote-btn')) {
+        handleVote(postId, 'upvotes');
+    } else if (e.target.closest('.downvote-btn')) {
+        handleVote(postId, 'downvotes');
+    } else if (e.target.closest('.comment-btn')) {
+        postEl.querySelector('.comment-section').classList.toggle('hidden');
+    } else if (e.target.closest('.comment-form')) {
         e.preventDefault();
         const form = e.target.closest('.comment-form');
         const input = form.querySelector('input');
         const parentId = form.dataset.parentId;
-        if (input.value.trim()) { addComment(postId, input.value.trim(), parentId); input.value = ''; form.closest('.reply-form-container')?.classList.add('hidden'); }
+        if (input.value.trim()) {
+            addComment(postId, input.value.trim(), parentId);
+            input.value = '';
+            form.closest('.reply-form-container')?.classList.add('hidden');
+        }
     } else if (e.target.closest('.board-link')) {
         e.preventDefault();
         allDom.mobileCategorySelect.value = e.target.dataset.catid;
