@@ -210,37 +210,28 @@ function setupEventListeners() {
     // *** The New, Simplified Mobile Search Animation ***
     let isMobileSearchActive = false;
 
-    function toggleMobileSearch(forceState) { // Can be true, false, or undefined to just toggle
-        const newState = (forceState === undefined) ? !isMobileSearchActive : forceState;
-        if (isMobileSearchActive === newState) return; // No change needed
-        
-        isMobileSearchActive = newState;
-        
-        // This is the wrapper around the select dropdown
-        const selectWrapper = allDom.mobileCategorySelectWrapper;
-        
-        if (isMobileSearchActive) {
-            // SHOW THE SEARCH BAR
-            selectWrapper.classList.add('hidden');
-            allDom.mobileRoomBtn.classList.remove('hidden');
+    function setMobileSearchState(active) {
+        isMobileSearchActive = active;
 
-            allDom.mobileSearchWrapper.classList.remove('w-0', 'opacity-0');
-            allDom.mobileSearchWrapper.classList.add('flex-grow');
+        // The dropdown should be hidden when search is active
+        allDom.mobileCategorySelectWrapper.classList.toggle('hidden', isMobileSearchActive);
 
-            allDom.mobileSearchBtn.classList.add('bg-primary');
+        // The room icon button is only visible and needed when search is active
+        allDom.mobileRoomBtn.classList.toggle('hidden', !isMobileSearchActive);
+        
+        // The search input field
+        const searchWrapper = allDom.mobileSearchWrapper;
+        searchWrapper.classList.toggle('w-0', !isMobileSearchActive);
+        searchWrapper.classList.toggle('opacity-0', !isMobileSearchActive);
+        searchWrapper.classList.toggle('flex-grow', isMobileSearchActive);
+        
+        // Highlight the search button
+        allDom.mobileSearchBtn.classList.toggle('bg-primary', isMobileSearchActive);
+
+        if (active) {
             setTimeout(() => allDom.searchBarMobile.focus(), 300);
-
         } else {
-            // HIDE THE SEARCH BAR
-            selectWrapper.classList.remove('hidden');
-            // Hide the room icon button since the dropdown is now visible
-            allDom.mobileRoomBtn.classList.add('hidden');
-            
-            allDom.mobileSearchWrapper.classList.add('w-0', 'opacity-0');
-            allDom.mobileSearchWrapper.classList.remove('flex-grow');
-            
-            allDom.mobileSearchBtn.classList.remove('bg-primary');
-
+            // Clear search if it had a value
             if (allDom.searchBarMobile.value) {
                 allDom.searchBarMobile.value = '';
                 currentFilter.search = '';
