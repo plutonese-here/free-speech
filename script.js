@@ -160,7 +160,17 @@ function setupEventListeners() {
     allDom.closeModalBtn.addEventListener('click', () => closeModal(allDom.postModal));
     allDom.postModal.querySelector('.modal-backdrop').addEventListener('click', () => closeModal(allDom.postModal));
     allDom.postForm.addEventListener('submit', handlePostSubmit);
-    allDom.fileUpload.addEventListener('change', () => { if (allDom.fileUpload.files.length > 0) allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name; });
+    allDom.fileUpload.addEventListener('change', () => {
+        if (allDom.fileUpload.files.length > 0) {
+            if (allDom.fileUpload.files.length === 1) {
+                allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name;
+            } else {
+                allDom.fileNameDisplay.textContent = `${allDom.fileUpload.files.length} files selected`;
+            }
+        } else {
+            allDom.fileNameDisplay.textContent = '';
+        }
+    });
     allDom.postFeed.addEventListener('click', handlePostFeedClick);
     allDom.searchBarDesktop.addEventListener('input', (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); });
     allDom.sortOrder.addEventListener('change', (e) => { currentFilter.sort = e.target.value; renderPosts(); });
@@ -292,11 +302,11 @@ function setSubmitButtonState(isSubmitting) {
 async function handlePostSubmit(e) {
     e.preventDefault();
     const content = allDom.postContent.value.trim();
-    const file = allDom.fileUpload.files[0];
+    const files = allDom.fileUpload.files; // Use 'files' (plural)
     const category = allDom.postCategory.value;
     const authorName = allDom.postAuthor.value.trim() || userProfile.name;
     
-    if (!content && !file) return;
+    if (!content && files.length === 0) return;
     if (!category) { alert('Please select a room!'); return; }
     
     setSubmitButtonState(true);
@@ -307,43 +317,43 @@ async function handlePostSubmit(e) {
     }
 
     try {
-        let fileURL = null;
-        let fileType = null;
+        const fileUploadPromises = [];
+        const workerUrl = 'https://freedom-uploader.ahsan-amal0987.workers.dev';
 
-        // ... inside handlePostSubmit, after checking for the file
-
-        if (file) {
-            fileType = file.type;
-
-            // IMPORTANT: Replace this with your actual Worker URL
-            const workerUrl = 'https://freedom-uploader.ahsan-amal0987.workers.dev';
-
-            // We send the file itself as the body and the name in a header
-            const response = await fetch(workerUrl, {
+        // Loop through all selected files and start an upload for each
+        for (const file of files) {
+            const uploadPromise = fetch(workerUrl, {
                 method: 'POST',
-                body: file, // Send the raw file data
+                body: file,
                 headers: {
                     'Content-Type': file.type,
-                    'x-filename': file.name // Custom header with the filename
+                    'x-filename': file.name
                 }
+            }).then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Upload failed for ${file.name}: ${text}`) });
+                }
+                return response.json();
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`File upload failed: ${errorText}`);
-            }
-
-            const result = await response.json();
-            fileURL = result.fileURL;
+            fileUploadPromises.push(uploadPromise);
         }
-
-        // ... the rest of the function (writing to Firestore) remains the same
-
-        // 4. Create the document in Firestore, just as before.
+        
+        // Wait for all the uploads to complete
+        const uploadedFiles = await Promise.all(fileUploadPromises);
+        
+        // Map the results to the format we want to store in Firestore
+        const filesForFirestore = uploadedFiles.map((result, index) => {
+            const originalFile = files[index];
+            return {
+                url: result.fileURL,
+                type: originalFile.type
+            };
+        });
+        
+        // Create the document in Firestore with an array of file objects
         await db.collection(`artifacts/${appId}/public/data/posts`).add({
             content: content,
-            fileURL: fileURL, // This is now the Cloudflare R2 URL
-            fileType: fileType,
+            files: filesForFirestore, // Store as an array named 'files'
             category: category,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             user: { name: authorName, icon: userProfile.icon },
@@ -392,26 +402,50 @@ function renderPosts() {
 }
 
 // Creates the HTML string for a single post object
+// Creates the HTML string for a single post object
 function createPostElement(post) {
     const timeAgo = post.timestamp ? moment(post.timestamp.toDate()).fromNow() : 'just now';
     const postUser = post.user || { name: 'Anonymous', icon: animalIcons[0] };
     const categoryInfo = categories.find(c => c.id === post.category);
     const voteStatus = sessionVotes[post.id];
-    let fileContent = '';
-    if (post.fileURL) {
-        if (post.fileType?.startsWith('image/')) { fileContent = `<img src="${post.fileURL}" alt="Post image" class="mt-4 rounded-lg max-h-96 w-auto mx-auto cursor-pointer" onclick="this.classList.toggle('max-h-96')">`; }
-        else if (post.fileType?.startsWith('video/')) { fileContent = `<video controls src="${post.fileURL}" class="mt-4 rounded-lg w-full"></video>`; } 
-        else if (post.fileType?.startsWith('audio/')) { fileContent = `<audio controls src="${post.fileURL}" class="mt-4 w-full"></audio>`; } 
-        else { fileContent = `<div class="mt-4 p-3 bg-[var(--bg-color)] rounded-md border border-[var(--border-color)]"><a href="${post.fileURL}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline flex items-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> View Attached File</a></div>` }
+    let filesContent = '';
+
+    // NEW LOGIC: Check for the 'files' array and loop through it
+    if (post.files && post.files.length > 0) {
+        const fileElements = post.files.map(file => {
+            if (!file || !file.type) return ''; // Safety check for malformed data
+
+            if (file.type.startsWith('image/')) {
+                return `<img src="${file.url}" alt="Post image" class="mt-2 rounded-lg max-h-96 w-auto mx-auto cursor-pointer" onclick="this.classList.toggle('max-h-96')">`;
+            } else if (file.type.startsWith('video/')) {
+                return `<video controls src="${file.url}" class="mt-2 rounded-lg w-full"></video>`;
+            } else if (file.type.startsWith('audio/')) {
+                return `<audio controls src="${file.url}" class="mt-2 w-full"></audio>`;
+            } else {
+                // Fallback for other file types
+                const fileName = file.url.split('/').pop().split('_').slice(1).join('_'); // Try to get a readable filename
+                return `<div class="mt-2 p-3 bg-[var(--bg-color)] rounded-md border border-[var(--border-color)]">
+                            <a href="${file.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                <span>View File: ${decodeURIComponent(fileName)}</span>
+                            </a>
+                        </div>`;
+            }
+        }).join('');
+
+        // Wrap all file elements in a container with spacing
+        filesContent = `<div class="mt-4 space-y-4">${fileElements}</div>`;
     }
+
+    // This is the full template. It uses the new `filesContent` variable.
     return `
         <div class="card rounded-lg shadow-lg p-5 transition duration-300 hover:shadow-xl" data-id="${post.id}">
             <div class="flex items-start space-x-4">
                 <div class="flex-shrink-0 w-10 h-10 text-primary">${postUser.icon}</div>
                 <div class="flex-grow">
                     <div class="flex items-center justify-between"><div class="flex items-center flex-wrap gap-x-2 text-sm"><span class="font-bold">${postUser.name}</span><span class="text-[var(--icon-color)]">·</span><span class="text-[var(--icon-color)]">${timeAgo}</span>${categoryInfo ? `<span class="text-[var(--icon-color)]">·</span> <a href="#" class="text-primary font-semibold board-link" data-catid="${categoryInfo.id}">${categoryInfo.name}</a>` : ''}</div></div>
-                    <p class="mt-1">${post.content || ''}</p>
-                    ${fileContent}
+                    <p class="mt-1 break-words">${post.content || ''}</p>
+                    ${filesContent}
                     <div class="mt-4 flex items-center space-x-6 text-[var(--icon-color)]">
                         <button class="flex items-center space-x-1 group upvote-btn"><svg class="w-5 h-5 icon group-hover:text-green-500 ${voteStatus === 'up' ? 'text-green-500' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg><span class="text-sm font-semibold group-hover:text-green-500 ${voteStatus === 'up' ? 'text-green-500' : ''}" data-role="upvote-count">${post.upvotes || 0}</span></button>
                         <button class="flex items-center space-x-1 group downvote-btn"><svg class="w-5 h-5 icon group-hover:text-red-500 ${voteStatus === 'down' ? 'text-red-500' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg><span class="text-sm font-semibold group-hover:text-red-500 ${voteStatus === 'down' ? 'text-red-500' : ''}" data-role="downvote-count">${post.downvotes || 0}</span></button>
