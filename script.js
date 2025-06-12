@@ -404,6 +404,20 @@ async function handlePostSubmit(e) {
     
     if (!content && files.length === 0) return;
     if (!category) { alert('Please select a room!'); return; }
+
+    // --- START: New File Size Validation Block ---
+    const MAX_FILE_SIZE_MB = 20;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+    for (const file of files) {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+            // Give the user a clear error and stop the submission
+            alert(`File "${file.name}" is too large. The maximum size is ${MAX_FILE_SIZE_MB} MB.`);
+            setSubmitButtonState(false); // Make sure to reset the button
+            return; // Stop the function here
+        }
+    }
+    // --- END: New File Size Validation Block ---
     
     setSubmitButtonState(true);
     
