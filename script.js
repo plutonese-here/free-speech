@@ -330,9 +330,16 @@ function setupEventListeners() {
     
     // NEW Lightbox controls
     allDom.lightboxClose.addEventListener('click', closeLightbox);
-    allDom.lightbox.querySelector('.lightbox-backdrop').addEventListener('click', closeLightbox);
     allDom.lightboxPrev.addEventListener('click', () => changeLightboxMedia(-1));
     allDom.lightboxNext.addEventListener('click', () => changeLightboxMedia(1));
+
+    // Listener for closing Lightbox
+    allDom.lightbox.addEventListener('click', (e) => {
+        // If the element that was directly clicked is the lightbox container itself...
+        if (e.target === allDom.lightbox) {
+            closeLightbox();
+        }
+    });
 
     document.addEventListener('keydown', (e) => {
         if (allDom.lightbox.classList.contains('hidden')) return;
