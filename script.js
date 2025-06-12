@@ -330,7 +330,12 @@ function setupEventListeners() {
     
     // NEW Lightbox controls
     allDom.lightboxClose.addEventListener('click', closeLightbox);
-    allDom.lightbox.querySelector('.lightbox-backdrop').addEventListener('click', closeLightbox);
+    allDom.lightboxContent.addEventListener('click', (e) => {
+        // Only close if the click is on the wrapper itself, not the media inside it.
+        if (e.target === allDom.lightboxContent) {
+            closeLightbox();
+        }
+    });
     allDom.lightboxPrev.addEventListener('click', () => changeLightboxMedia(-1));
     allDom.lightboxNext.addEventListener('click', () => changeLightboxMedia(1));
     document.addEventListener('keydown', (e) => {
@@ -599,6 +604,7 @@ function handlePostFeedClick(e) {
         if (postId !== undefined && mediaIndex !== undefined) {
             openLightbox(postId, mediaIndex);
         }
+        return; // Important: Stop processing so we don't treat it as another click.
     }
 
     // --- Other Clicks ---
