@@ -80,11 +80,26 @@ body { background-color: var(--bg-color); color: var(--text-color); transition: 
 }
 
 /* --- Lightbox Styles --- */
+#lightbox {
+    /* This is the main container, it has a high z-index from the HTML */
+    /* Its children will stack based on their own z-index */
+}
+
 .lightbox-backdrop {
     position: fixed;
     inset: 0;
     background-color: rgba(0, 0, 0, 0.85);
-    z-index: 9998;
+    /* The backdrop is the bottom layer, so it has no z-index */
+}
+
+/* The media wrapper MUST have a z-index higher than the backdrop */
+#lightbox-content-wrapper {
+    z-index: 10;
+}
+
+/* The controls MUST have the highest z-index */
+.lightbox-close, .lightbox-nav, .lightbox-counter {
+    z-index: 20;
 }
 
 .lightbox-content {
@@ -99,6 +114,7 @@ body { background-color: var(--bg-color); color: var(--text-color); transition: 
     max-width: 90vw;
     max-height: 85vh;
     object-fit: contain;
+    border-radius: 0.25rem; /* adds a slight curve to the media */
 }
 
 .lightbox-close, .lightbox-nav {
