@@ -73,10 +73,10 @@ function main() {
         
         // --- Mobile Controls ---
         mobileControlsContainer: document.getElementById('mobile-controls-container'),
+        mobileControlsContainer: document.getElementById('mobile-controls-container'),
         mobileCategorySelect: document.getElementById('mobileCategorySelect'),
-        mobileCategorySelectWrapper: document.getElementById('mobile-category-select-wrapper'),
-        mobileRoomBtn: document.getElementById('mobile-room-btn'),
-        mobileRoomSelectorWrapper: document.getElementById('mobile-room-selector-wrapper'),
+        mobileRoomWrapper: document.getElementById('mobile-room-wrapper'), // Renamed from selector-wrapper
+        mobileRoomArrow: document.getElementById('mobile-room-arrow'), // ID is on the div now
         mobileSearchWrapper: document.getElementById('mobile-search-wrapper'),
         searchBarMobile: document.getElementById('searchBarMobile'),
         mobileSearchBtn: document.getElementById('mobile-search-btn'),
@@ -155,7 +155,7 @@ function setupCategories() {
 
 // Attaches all necessary event listeners to the DOM
 function setupEventListeners() {
-    // --- Theming & Main Modal Listeners (These are all correct) ---
+    // --- Theming & Main Modal Listeners ---
     allDom.themeToggle.addEventListener('click', toggleTheme);
     allDom.colorThemeBtn.addEventListener('click', (e) => { e.stopPropagation(); allDom.colorOptions.classList.toggle('hidden'); });
     allDom.newPostBtn.addEventListener('click', () => { allDom.postAuthor.value = userProfile.name; openModal(allDom.postModal); });
@@ -165,11 +165,11 @@ function setupEventListeners() {
     allDom.fileUpload.addEventListener('change', () => { if (allDom.fileUpload.files.length > 0) allDom.fileNameDisplay.textContent = allDom.fileUpload.files[0].name; });
     allDom.postFeed.addEventListener('click', handlePostFeedClick);
 
-    // --- Desktop Controls (Correct) ---
+    // --- Desktop Controls ---
     allDom.searchBarDesktop.addEventListener('input', (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); });
     allDom.sortOrder.addEventListener('change', (e) => { currentFilter.sort = e.target.value; renderPosts(); });
 
-    // --- Category/Room Change Logic (Shared) ---
+    // --- Shared Logic for Changing Categories ---
     const handleCategoryChange = (catId) => {
         currentFilter.category = catId;
         const cat = categories.find(c => c.id === catId);
@@ -180,12 +180,11 @@ function setupEventListeners() {
         renderPosts();
     };
 
-    allDom.categoryList.addEventListener('click', (e) => { e.preventDefault(); if (e.target.closest('a[data-catid]')) handleCategoryChange(e.target.closest('a[data-catid]').dataset.catid); });
+    allDom.categoryList.addEventListener('click', (e) => { e.preventDefault(); const link = e.target.closest('a[data-catid]'); if (link) handleCategoryChange(link.dataset.catid); });
     allDom.mobileCategorySelect.addEventListener('change', (e) => handleCategoryChange(e.target.value));
-
-    // --- Mobile-Specific Listeners ---
     allDom.searchBarMobile.addEventListener('input', (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); });
-
+    
+    // --- Mobile Sort ---
     const sortOptions = { recent: 'Most Recent', upvoted: 'Most Upvoted', commented: 'Most Commented' };
     allDom.sortMenuMobile.innerHTML = '';
     for (const [value, text] of Object.entries(sortOptions)) {
@@ -195,7 +194,6 @@ function setupEventListeners() {
         button.textContent = text;
         allDom.sortMenuMobile.appendChild(button);
     }
-    
     allDom.mobileSortBtn.addEventListener('click', (e) => { e.stopPropagation(); allDom.sortMenuMobile.classList.toggle('hidden'); });
     allDom.sortMenuMobile.addEventListener('click', (e) => {
         const button = e.target.closest('.sort-option-mobile');
@@ -207,31 +205,27 @@ function setupEventListeners() {
         }
     });
 
-    // *** The New, Simplified Mobile Search Animation ***
+    // --- The FINAL Mobile Search Animation Logic ---
     let isMobileSearchActive = false;
-
     function setMobileSearchState(active) {
+        if (isMobileSearchActive === active) return;
         isMobileSearchActive = active;
 
-        // The dropdown should be hidden when search is active
-        allDom.mobileCategorySelectWrapper.classList.toggle('hidden', isMobileSearchActive);
+        allDom.mobileSearchWrapper.classList.toggle('w-0', !active);
+        allDom.mobileSearchWrapper.classList.toggle('opacity-0', !active);
+        allDom.mobileSearchWrapper.classList.toggle('flex-grow', active);
 
-        // The room icon button is only visible and needed when search is active
-        allDom.mobileRoomBtn.classList.toggle('hidden', !isMobileSearchActive);
+        allDom.mobileRoomWrapper.classList.toggle('w-10', active);
+        allDom.mobileRoomWrapper.classList.toggle('flex-grow', !active);
         
-        // The search input field
-        const searchWrapper = allDom.mobileSearchWrapper;
-        searchWrapper.classList.toggle('w-0', !isMobileSearchActive);
-        searchWrapper.classList.toggle('opacity-0', !isMobileSearchActive);
-        searchWrapper.classList.toggle('flex-grow', isMobileSearchActive);
-        
-        // Highlight the search button
-        allDom.mobileSearchBtn.classList.toggle('bg-primary', isMobileSearchActive);
+        allDom.mobileCategorySelect.classList.toggle('hidden', active);
+        allDom.mobileRoomArrow.classList.toggle('hidden', active);
+
+        allDom.mobileSearchBtn.classList.toggle('bg-primary', active);
 
         if (active) {
             setTimeout(() => allDom.searchBarMobile.focus(), 300);
         } else {
-            // Clear search if it had a value
             if (allDom.searchBarMobile.value) {
                 allDom.searchBarMobile.value = '';
                 currentFilter.search = '';
@@ -240,27 +234,28 @@ function setupEventListeners() {
         }
     }
 
-    // On mobile, the room button is hidden by default. Let's fix that here.
-    allDom.mobileRoomBtn.classList.add('hidden'); 
-    
-    // Clicking Search toggles the state
     allDom.mobileSearchBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        toggleMobileSearch();
+        setMobileSearchState(!isMobileSearchActive);
+    });
+    
+    allDom.mobileRoomWrapper.addEventListener('click', (e) => {
+        if(isMobileSearchActive) {
+            e.preventDefault();
+            setMobileSearchState(false);
+        }
     });
 
-    // Clicking the Room Icon Button closes the search
-    allDom.mobileRoomBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMobileSearch(false); // Force close
-    });
-
-    // Global Click Listener for Closing Menus
+    // --- Final Global Click Listener for Closing Menus ---
     document.addEventListener('click', (e) => {
-        if (!allDom.colorThemeBtn.contains(e.target)) allDom.colorOptions.classList.add('hidden');
-        if (!allDom.mobileSortBtn.contains(e.target)) allDom.sortMenuMobile.classList.add('hidden');
+        if (!allDom.colorThemeBtn.contains(e.target) && !allDom.colorOptions.contains(e.target)) {
+            allDom.colorOptions.classList.add('hidden');
+        }
+        if (!allDom.mobileSortBtn.contains(e.target) && !allDom.sortMenuMobile.contains(e.target)) {
+            allDom.sortMenuMobile.classList.add('hidden');
+        }
         if (isMobileSearchActive && !e.target.closest('#mobile-controls-container')) {
-            toggleMobileSearch(false);
+            setMobileSearchState(false);
         }
     });
 }
