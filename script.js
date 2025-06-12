@@ -173,16 +173,28 @@ function openLightbox(postId, mediaIndex) {
     
     if (currentLightboxMedia.length === 0) return;
 
-    allDom.lightbox.classList.remove('hidden');
+    allDom.lightbox.classList.remove('hidden', 'animate-fade-out');
+    allDom.lightbox.classList.add('animate-fade-in');
     document.body.style.overflow = 'hidden'; // Prevent scrolling background
     
     renderLightboxMedia();
 }
 
+// The Corrected closeLightbox() function with animation
 function closeLightbox() {
-    allDom.lightbox.classList.add('hidden');
-    document.body.style.overflow = '';
-    allDom.lightboxContent.innerHTML = ''; // Clear content
+    // 1. Add the fade-out animation class
+    allDom.lightbox.classList.add('animate-fade-out');
+    allDom.lightbox.classList.remove('animate-fade-in');
+
+    // 2. After the animation duration (300ms), hide the element and clean up
+    setTimeout(() => {
+        allDom.lightbox.classList.add('hidden');
+        allDom.lightbox.classList.remove('animate-fade-out'); // Reset for next time
+        
+        // Other cleanup
+        document.body.style.overflow = '';
+        allDom.lightboxContent.innerHTML = '';
+    }, 300); // This duration must match the CSS animation duration
 }
 
 function changeLightboxMedia(direction) {
