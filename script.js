@@ -599,7 +599,6 @@ function handlePostFeedClick(e) {
         if (postId !== undefined && mediaIndex !== undefined) {
             openLightbox(postId, mediaIndex);
         }
-        return; // Important: Stop processing so we don't treat it as another click.
     }
 
     // --- Other Clicks ---
