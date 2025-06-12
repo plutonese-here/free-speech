@@ -224,8 +224,10 @@ function setupEventListeners() {
         allDom.mobileSearchBtn.classList.toggle('bg-primary', active);
 
         if (active) {
+            allDom.mobileRoomWrapper.classList.add('card', 'rounded-full');
             setTimeout(() => allDom.searchBarMobile.focus(), 300);
         } else {
+            allDom.mobileRoomWrapper.classList.remove('card', 'rounded-full');
             if (allDom.searchBarMobile.value) {
                 allDom.searchBarMobile.value = '';
                 currentFilter.search = '';
