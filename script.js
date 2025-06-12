@@ -327,15 +327,6 @@ function setupEventListeners() {
             setMobileSearchState(false);
         }
     });
-
-    // NEW Event listener for opening the lightbox
-    allDom.postFeed.addEventListener('click', (e) => {
-        const thumbnail = e.target.closest('.open-lightbox');
-        if (thumbnail) {
-            const { postId, mediaIndex } = thumbnail.querySelector('[data-post-id]').dataset;
-            openLightbox(postId, mediaIndex);
-        }
-    });
     
     // NEW Lightbox controls
     allDom.lightboxClose.addEventListener('click', closeLightbox);
@@ -596,8 +587,22 @@ function createCommentElement(comment) {
 
 // Handles all clicks on the post feed using event delegation
 function handlePostFeedClick(e) {
+    // Lightbox Click
+    const lightboxTrigger = e.target.closest('.open-lightbox');
+    if (lightboxTrigger) {
+        e.preventDefault();
+        const mediaElement = lightboxTrigger.querySelector('[data-post-id]');
+        if (mediaElement) {
+            const { postId, mediaIndex } = mediaElement.dataset;
+            openLightbox(postId, mediaIndex);
+        }
+        return; // Stop further processing
+    }
+
+    // Regular Post Interaction Click
     const postEl = e.target.closest('[data-id]');
     if (!postEl) return;
+
     const postId = postEl.dataset.id;
     if (e.target.closest('.upvote-btn')) handleVote(postId, 'upvotes');
     else if (e.target.closest('.downvote-btn')) handleVote(postId, 'downvotes');
