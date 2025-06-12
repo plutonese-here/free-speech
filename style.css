@@ -55,3 +55,91 @@ body { background-color: var(--bg-color); color: var(--text-color); transition: 
 ::-webkit-scrollbar { width: 12px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); border-radius: 20px; border: 3px solid var(--scrollbar-track); }
+
+/* --- Thumbnail Grid Styles --- */
+.thumbnail-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem; /* 8px */
+}
+
+.thumbnail-item {
+    width: 120px;
+    height: 120px;
+    border-radius: 0.5rem; /* 8px */
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--border-color);
+}
+
+.thumbnail-item img, .thumbnail-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* This is key to making non-square images look good */
+}
+
+/* --- Lightbox Styles --- */
+.lightbox-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9998;
+}
+
+.lightbox-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-media {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+}
+
+.lightbox-close, .lightbox-nav {
+    position: absolute;
+    top: 1rem;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+.lightbox-close:hover, .lightbox-nav:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+.lightbox-close {
+    right: 1rem;
+}
+.lightbox-nav.prev {
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.lightbox-nav.next {
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    user-select: none;
+}

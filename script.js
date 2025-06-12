@@ -80,7 +80,15 @@ function main() {
         searchBarMobile: document.getElementById('searchBarMobile'),
         mobileSearchBtn: document.getElementById('mobile-search-btn'),
         mobileSortBtn: document.getElementById('mobile-sort-btn'),
-        sortMenuMobile: document.getElementById('sort-menu-mobile')
+        sortMenuMobile: document.getElementById('sort-menu-mobile'),
+
+        // --- Lightbox Elements ---
+        lightbox: document.getElementById('lightbox'),
+        lightboxContent: document.getElementById('lightbox-content-wrapper'),
+        lightboxClose: document.getElementById('lightbox-close'),
+        lightboxPrev: document.getElementById('lightbox-prev'),
+        lightboxNext: document.getElementById('lightbox-next'),
+        lightboxCounter: document.getElementById('lightbox-counter')
     };
     
     // Run all setup functions
@@ -149,6 +157,65 @@ function setupCategories() {
         allDom.mobileCategorySelect.appendChild(option.cloneNode(true));
         if (cat.id !== 'all') allDom.postCategory.appendChild(option);
     });
+}
+
+// --- NEW Lightbox Global State ---
+let currentLightboxMedia = [];
+let currentLightboxIndex = 0;
+
+// --- NEW Lightbox Functions ---
+function openLightbox(postId, mediaIndex) {
+    const post = allPosts.find(p => p.id === postId);
+    if (!post || !post.files) return;
+
+    currentLightboxMedia = post.files.filter(f => f.type?.startsWith('image/') || f.type?.startsWith('video/'));
+    currentLightboxIndex = parseInt(mediaIndex, 10);
+    
+    if (currentLightboxMedia.length === 0) return;
+
+    allDom.lightbox.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent scrolling background
+    
+    renderLightboxMedia();
+}
+
+function closeLightbox() {
+    allDom.lightbox.classList.add('hidden');
+    document.body.style.overflow = '';
+    allDom.lightboxContent.innerHTML = ''; // Clear content
+}
+
+function changeLightboxMedia(direction) {
+    currentLightboxIndex += direction;
+    
+    if (currentLightboxIndex < 0) {
+        currentLightboxIndex = currentLightboxMedia.length - 1;
+    } else if (currentLightboxIndex >= currentLightboxMedia.length) {
+        currentLightboxIndex = 0;
+    }
+    
+    renderLightboxMedia();
+}
+
+function renderLightboxMedia() {
+    const media = currentLightboxMedia[currentLightboxIndex];
+    let contentHtml = '';
+
+    if (media.type.startsWith('image/')) {
+        contentHtml = `<img src="${media.url}" class="lightbox-media">`;
+    } else if (media.type.startsWith('video/')) {
+        contentHtml = `<video controls autoplay loop src="${media.url}" class="lightbox-media"></video>`;
+    }
+    allDom.lightboxContent.innerHTML = contentHtml;
+    
+    const showNav = currentLightboxMedia.length > 1;
+    allDom.lightboxPrev.classList.toggle('hidden', !showNav);
+    allDom.lightboxNext.classList.toggle('hidden', !showNav);
+    allDom.lightboxCounter.classList.toggle('hidden', !showNav);
+    
+    if(showNav) {
+        allDom.lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${currentLightboxMedia.length}`;
+    }
 }
 
 // Attaches all necessary event listeners to the DOM
@@ -259,6 +326,28 @@ function setupEventListeners() {
         if (isMobileSearchActive && !e.target.closest('#mobile-controls-container')) {
             setMobileSearchState(false);
         }
+    });
+
+    // NEW Event listener for opening the lightbox
+    allDom.postFeed.addEventListener('click', (e) => {
+        const thumbnail = e.target.closest('.open-lightbox');
+        if (thumbnail) {
+            const { postId, mediaIndex } = thumbnail.querySelector('[data-post-id]').dataset;
+            openLightbox(postId, mediaIndex);
+        }
+    });
+    
+    // NEW Lightbox controls
+    allDom.lightboxClose.addEventListener('click', closeLightbox);
+    allDom.lightbox.querySelector('.lightbox-backdrop').addEventListener('click', closeLightbox);
+    allDom.lightboxPrev.addEventListener('click', () => changeLightboxMedia(-1));
+    allDom.lightboxNext.addEventListener('click', () => changeLightboxMedia(1));
+
+    document.addEventListener('keydown', (e) => {
+        if (allDom.lightbox.classList.contains('hidden')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') changeLightboxMedia(-1);
+        if (e.key === 'ArrowRight') changeLightboxMedia(1);
     });
 }
 
@@ -403,6 +492,7 @@ function renderPosts() {
 
 // Creates the HTML string for a single post object
 // Creates the HTML string for a single post object
+// Creates the HTML string for a single post object
 function createPostElement(post) {
     const timeAgo = post.timestamp ? moment(post.timestamp.toDate()).fromNow() : 'just now';
     const postUser = post.user || { name: 'Anonymous', icon: animalIcons[0] };
@@ -410,34 +500,55 @@ function createPostElement(post) {
     const voteStatus = sessionVotes[post.id];
     let filesContent = '';
 
-    // NEW LOGIC: Check for the 'files' array and loop through it
+    // NEW LOGIC STARTS HERE
     if (post.files && post.files.length > 0) {
-        const fileElements = post.files.map(file => {
-            if (!file || !file.type) return ''; // Safety check for malformed data
+        
+        // 1. Separate media (images/videos) from other file types
+        const mediaFiles = post.files.filter(f => f && f.type && (f.type.startsWith('image/') || f.type.startsWith('video/')));
+        const otherFiles = post.files.filter(f => f && f.type && (!f.type.startsWith('image/') && !f.type.startsWith('video/')));
+        
+        let mediaGridHtml = '';
+        if (mediaFiles.length > 0) {
+            // 2. Build the thumbnail grid for images and videos
+            const mediaThumbnails = mediaFiles.map((file, index) => {
+                const datasetAttributes = `data-post-id="${post.id}" data-media-index="${index}"`;
+                
+                let thumbnailHtml;
+                if (file.type.startsWith('image/')) {
+                    thumbnailHtml = `<img src="${file.url}" alt="Post thumbnail" class="w-full h-full object-cover">`;
+                } else { // It's a video
+                    // Use #t=0.1 to show the first frame as a thumbnail
+                    thumbnailHtml = `<video muted playsinline preload="metadata" src="${file.url}#t=0.1" class="w-full h-full object-cover"></video>`;
+                }
+                
+                // Each item is a clickable div that can open the lightbox
+                return `<div class="thumbnail-item open-lightbox" ${datasetAttributes}>${thumbnailHtml}</div>`;
+            }).join('');
+            
+            mediaGridHtml = `<div class="thumbnail-grid mt-4">${mediaThumbnails}</div>`;
+        }
 
-            if (file.type.startsWith('image/')) {
-                return `<img src="${file.url}" alt="Post image" class="mt-2 rounded-lg max-h-96 w-auto mx-auto cursor-pointer" onclick="this.classList.toggle('max-h-96')">`;
-            } else if (file.type.startsWith('video/')) {
-                return `<video controls src="${file.url}" class="mt-2 rounded-lg w-full"></video>`;
-            } else if (file.type.startsWith('audio/')) {
-                return `<audio controls src="${file.url}" class="mt-2 w-full"></audio>`;
-            } else {
-                // Fallback for other file types
-                const fileName = file.url.split('/').pop().split('_').slice(1).join('_'); // Try to get a readable filename
-                return `<div class="mt-2 p-3 bg-[var(--bg-color)] rounded-md border border-[var(--border-color)]">
-                            <a href="${file.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                                <span>View File: ${decodeURIComponent(fileName)}</span>
+        let otherFilesHtml = '';
+        if (otherFiles.length > 0) {
+            // 3. Build the list for other file types (like audio or documents)
+            const otherFileItems = otherFiles.map(file => {
+                 const fileName = decodeURIComponent(file.url.split('/').pop().split('_').slice(1).join('_') || 'file');
+                 return `<div class="mt-2 p-2 bg-[var(--bg-color)] rounded-md border border-[var(--border-color)]">
+                            <a href="${file.url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline flex items-center text-sm">
+                                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                <span class="truncate">${fileName}</span>
                             </a>
                         </div>`;
-            }
-        }).join('');
-
-        // Wrap all file elements in a container with spacing
-        filesContent = `<div class="mt-4 space-y-4">${fileElements}</div>`;
+            }).join('');
+            otherFilesHtml = `<div class="mt-4 space-y-2">${otherFileItems}</div>`;
+        }
+        
+        // 4. Combine both parts into the final content
+        filesContent = mediaGridHtml + otherFilesHtml;
     }
+    // NEW LOGIC ENDS HERE
 
-    // This is the full template. It uses the new `filesContent` variable.
+    // The rest of the function returns the complete post HTML as before.
     return `
         <div class="card rounded-lg shadow-lg p-5 transition duration-300 hover:shadow-xl" data-id="${post.id}">
             <div class="flex items-start space-x-4">

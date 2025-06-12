@@ -197,10 +197,30 @@
         </div>
     </div>
 
+    <!-- NEW: Lightbox Modal for Media -->
+    <div id="lightbox" class="fixed inset-0 z-[100] items-center justify-center hidden animate-fade-in">
+        <div class="lightbox-backdrop fixed inset-0"></div>
+
+        <div id="lightbox-content-wrapper" class="relative z-10 w-full h-full p-4 flex items-center justify-center">
+            <!-- Media will be injected here by JavaScript -->
+        </div>
+
+        <!-- Navigation & Close Buttons -->
+        <button id="lightbox-close" class="lightbox-close">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <button id="lightbox-prev" class="lightbox-nav prev">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button id="lightbox-next" class="lightbox-nav next">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <div id="lightbox-counter" class="lightbox-counter hidden"></div>
+    </div>
 
     <!-- The Correct Script Loading Order -->
 
-    <!-- This is where Netlify will inject your config as a JS object -->
+    <!-- This is where Netlify will inject the firebase config as a JS object -->
     <script>
         const firebaseConfig = %%FIREBASE_CONFIG%%; 
     </script>
