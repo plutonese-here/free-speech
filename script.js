@@ -642,7 +642,7 @@ function createCommentElement(comment) {
     return `
         <div class="comment-wrapper flex items-start space-x-3">
             <div class="flex-shrink-0 w-8 h-8 text-primary">${commentUser.icon}</div>
-            <div class="flex-grow pb-4">
+            <div class="flex-grow">
                 <div class="bg-[var(--bg-color)] p-3 rounded-lg"><span class="font-bold text-sm">${commentUser.name}</span><p class="text-sm">${comment.text}</p></div>
                 <div class="actions text-xs text-[var(--icon-color)] mt-1 pl-1 flex items-center gap-2"><span>${timeAgo}</span> · <button class="font-semibold hover:underline reply-to-comment-btn">Reply</button></div>
                 <div class="reply-form-container mt-2 hidden"><form class="comment-form flex space-x-2" data-parent-id="${comment.id}"><input type="text" class="comment-input w-full p-2 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Reply to ${commentUser.name}..." maxlength="2000"><button type="submit" class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-3 rounded-full text-sm">Reply</button></form></div>
