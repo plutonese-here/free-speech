@@ -94,6 +94,7 @@ body { background-color: var(--bg-color); color: var(--text-color); transition: 
     justify-content: center;
     pointer-events: none; /* Allows clicks to go through to the video thumbnail */
     transition: transform 0.2s, background-color 0.2s;
+    border: 2px solid rgba(255, 255, 255, 0.75);
 }
 
 .thumbnail-item:hover .play-icon-overlay {
