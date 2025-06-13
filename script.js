@@ -576,7 +576,15 @@ function createPostElement(post) {
                 <div class="flex-shrink-0 w-10 h-10 text-primary">${postUser.icon}</div>
                 <div class="flex-grow">
                     <div class="flex items-center justify-between"><div class="flex items-center flex-wrap gap-x-2 text-sm"><span class="font-bold">${postUser.name}</span><span class="text-[var(--icon-color)]">·</span><span class="text-[var(--icon-color)]">${timeAgo}</span>${categoryInfo ? `<span class="text-[var(--icon-color)]">·</span> <a href="#" class="text-primary font-semibold board-link" data-catid="${categoryInfo.id}">${categoryInfo.name}</a>` : ''}</div></div>
-                    <p class="mt-1 break-words">${post.content || ''}</p>
+                    // This new block replaces the old <p> tag
+                    <div class="post-content-wrapper mt-1">
+                        ${
+                            post.content && post.content.length > 400
+                                ? `<div class="post-text-full hidden">${post.content.replace(/\n/g, '<br>')} <button class="text-primary font-semibold collapse-btn hover:underline">See less</button></div>
+                                <div class="post-text-truncated break-words">${post.content.substring(0, 400)}... <button class="text-primary font-semibold expand-btn hover:underline">See more</button></div>`
+                                : `<div class="post-text-full break-words">${(post.content || '').replace(/\n/g, '<br>')}</div>`
+                        }
+                    </div>
                     ${filesContent}
                     <div class="mt-4 flex items-center space-x-6 text-[var(--icon-color)]">
                         <button class="flex items-center space-x-1 group upvote-btn"><svg class="w-5 h-5 icon group-hover:text-green-500 ${voteStatus === 'up' ? 'text-green-500' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg><span class="text-sm font-semibold group-hover:text-green-500 ${voteStatus === 'up' ? 'text-green-500' : ''}" data-role="upvote-count">${post.upvotes || 0}</span></button>
@@ -586,7 +594,7 @@ function createPostElement(post) {
                 </div>
             </div>
             <div class="comment-section mt-4 pl-0 sm:pl-14 hidden">
-                <form class="comment-form flex space-x-2" data-parent-id="root"><input type="text" class="comment-input w-full p-2 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Add a comment..."><button type="submit" class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded-full">Reply</button></form>
+                <form class="comment-form flex space-x-2" data-parent-id="root"><input type="text" class="comment-input w-full p-2 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Add a comment..." maxlength="2000"><button type="submit" class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded-full">Reply</button></form>
                 <div class="comments-list mt-4 space-y-3">${renderCommentTree(post.comments)}</div>
             </div>
         </div>`;
@@ -610,7 +618,7 @@ function createCommentElement(comment) {
             <div class="flex-grow">
                 <div class="bg-[var(--bg-color)] p-3 rounded-lg"><span class="font-bold text-sm">${commentUser.name}</span><p class="text-sm">${comment.text}</p></div>
                 <div class="actions text-xs text-[var(--icon-color)] mt-1 pl-1 flex items-center gap-2"><span>${timeAgo}</span> · <button class="font-semibold hover:underline reply-to-comment-btn">Reply</button></div>
-                <div class="reply-form-container mt-2 hidden"><form class="comment-form flex space-x-2" data-parent-id="${comment.id}"><input type="text" class="comment-input w-full p-2 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Reply to ${commentUser.name}..."><button type="submit" class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-3 rounded-full text-sm">Reply</button></form></div>
+                <div class="reply-form-container mt-2 hidden"><form class="comment-form flex space-x-2" data-parent-id="${comment.id}"><input type="text" class="comment-input w-full p-2 rounded-md bg-[var(--bg-color)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Reply to ${commentUser.name}..." maxlength="2000"><button type="submit" class="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-3 rounded-full text-sm">Reply</button></form></div>
             </div>
         </div>`;
 }
@@ -632,6 +640,30 @@ function handlePostFeedClick(e) {
         return; // Stop after handling lightbox click
     }
 
+    // --- NEW: Handle post text expand/collapse ---
+    const postTextWrapper = e.target.closest('.post-content-wrapper');
+    if (postTextWrapper) {
+        const expandBtn = e.target.closest('.expand-btn');
+        const collapseBtn = e.target.closest('.collapse-btn');
+        const truncatedText = postTextWrapper.querySelector('.post-text-truncated');
+        const fullText = postTextWrapper.querySelector('.post-text-full');
+        
+        // Only toggle if we have both versions of the text
+        if (truncatedText && fullText) {
+            // If the "See more" button was clicked, or we are on mobile and click anywhere in the text area
+            if (expandBtn || (e.target.closest('.post-text-truncated') && window.innerWidth < 768)) {
+                truncatedText.classList.add('hidden');
+                fullText.classList.remove('hidden');
+            }
+            // If the "See less" button was clicked, or we are on mobile and click the expanded text
+            if (collapseBtn || (e.target.closest('.post-text-full') && window.innerWidth < 768)) {
+                truncatedText.classList.remove('hidden');
+                fullText.classList.add('hidden');
+            }
+        }
+    }
+    // --- End of new expand/collapse logic ---
+    
     // --- Other Clicks ---
     const postEl = e.target.closest('[data-id]');
     if (!postEl) return;
