@@ -110,10 +110,6 @@ body { background-color: var(--bg-color); color: var(--text-color); transition: 
 }
 
 /* --- Lightbox Styles --- */
-#lightbox {
-    /* This is the main container, it has a high z-index from the HTML */
-    /* Its children will stack based on their own z-index */
-}
 
 .lightbox-backdrop {
     position: fixed;

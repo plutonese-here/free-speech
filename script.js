@@ -495,6 +495,16 @@ function loadPosts() {
 
 // Renders the current list of `allPosts` to the DOM after filtering/sorting
 function renderPosts() {
+    // --- START OF NEW LOGIC ---
+    // 1. Remember which comment sections are currently open
+    const openCommentSections = new Set();
+    document.querySelectorAll('.comment-section:not(.hidden)').forEach(section => {
+        const postId = section.closest('[data-id]')?.dataset.id;
+        if (postId) {
+            openCommentSections.add(postId);
+        }
+    });
+    // --- END OF NEW LOGIC ---
     let postsToRender = [...allPosts];
     const searchTerm = (allDom.searchBarDesktop.value || allDom.searchBarMobile.value).toLowerCase();
     if (searchTerm) { postsToRender = postsToRender.filter(p => p.content?.toLowerCase().includes(searchTerm)); }
@@ -509,6 +519,15 @@ function renderPosts() {
     allDom.postFeed.innerHTML = postsToRender.length === 0 
         ? `<div class="card p-8 text-center text-[var(--icon-color)]">No posts found. Try changing filters.</div>`
         : postsToRender.map(createPostElement).join('');
+    // --- START OF NEW LOGIC ---
+    // 2. After rendering, re-open the sections that were open before
+    openCommentSections.forEach(postId => {
+        const postElement = document.querySelector(`.card[data-id="${postId}"] .comment-section`);
+        if (postElement) {
+            postElement.classList.remove('hidden');
+        }
+    });
+    // --- END OF NEW LOGIC ---
 }
 
 // Creates the HTML string for a single post object
