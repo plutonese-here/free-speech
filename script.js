@@ -231,10 +231,10 @@ function renderLightboxMedia() {
 }
 
 // Attaches all necessary event listeners to the DOM
+// This is the full, corrected function to replace your old one.
 function setupEventListeners() {
-    // --- All top-level listeners are the same ---
+    // --- Theming & Main Modal Listeners ---
     allDom.themeToggle.addEventListener('click', toggleTheme);
-    allDom.colorThemeBtn.addEventListener('click', (e) => { e.stopPropagation(); allDom.colorOptions.classList.toggle('hidden'); });
     allDom.newPostBtn.addEventListener('click', () => { allDom.postAuthor.value = userProfile.name; openModal(allDom.postModal); });
     allDom.closeModalBtn.addEventListener('click', () => closeModal(allDom.postModal));
     allDom.postModal.querySelector('.modal-backdrop').addEventListener('click', () => closeModal(allDom.postModal));
@@ -250,10 +250,15 @@ function setupEventListeners() {
             allDom.fileNameDisplay.textContent = '';
         }
     });
+    
+    // --- Main Event Delegation Listeners ---
     allDom.postFeed.addEventListener('click', handlePostFeedClick);
+    
+    // --- Desktop Controls ---
     allDom.searchBarDesktop.addEventListener('input', (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); });
     allDom.sortOrder.addEventListener('change', (e) => { currentFilter.sort = e.target.value; renderPosts(); });
 
+    // --- Category/Room Change Logic (Shared) ---
     const handleCategoryChange = (catId) => {
         currentFilter.category = catId;
         const cat = categories.find(c => c.id === catId);
@@ -268,6 +273,7 @@ function setupEventListeners() {
     allDom.mobileCategorySelect.addEventListener('change', (e) => handleCategoryChange(e.target.value));
     allDom.searchBarMobile.addEventListener('input', (e) => { currentFilter.search = e.target.value.toLowerCase(); renderPosts(); });
     
+    // --- Mobile Sort ---
     const sortOptions = { recent: 'Most Recent', upvoted: 'Most Upvoted', commented: 'Most Commented' };
     allDom.sortMenuMobile.innerHTML = '';
     for (const [value, text] of Object.entries(sortOptions)) {
@@ -288,26 +294,20 @@ function setupEventListeners() {
         }
     });
 
-    // *** FINAL SIMPLIFIED MOBILE SEARCH LOGIC ***
+    // --- Mobile Search Animation Logic ---
     let isMobileSearchActive = false;
-
     function setMobileSearchState(active) {
         if (isMobileSearchActive === active) return;
         isMobileSearchActive = active;
-
-        // TOGGLE VISIBILITY of the two main components
         allDom.mobileRoomBtn.classList.toggle('hidden', !active);
         allDom.mobileCategorySelectWrapper.classList.toggle('hidden', active);
-        
-        // GROW/SHRINK the search input
+        allDom.mobileSearchWrapper.classList.toggle('hidden', !active);
         allDom.mobileSearchWrapper.classList.toggle('w-0', !active);
         allDom.mobileSearchWrapper.classList.toggle('opacity-0', !active);
         allDom.mobileSearchWrapper.classList.toggle('flex-grow', active);
-        
         allDom.mobileSearchBtn.classList.toggle('bg-primary', active);
-
         if (active) {
-            setTimeout(() => allDom.searchBarMobile.focus(), 300);
+            setTimeout(() => allDom.searchBarMobile.focus(), 50);
         } else {
             if (allDom.searchBarMobile.value) {
                 allDom.searchBarMobile.value = '';
@@ -316,43 +316,25 @@ function setupEventListeners() {
             }
         }
     }
+    allDom.mobileSearchBtn.addEventListener('click', (e) => { e.stopPropagation(); setMobileSearchState(!isMobileSearchActive); });
+    allDom.mobileRoomBtn.addEventListener('click', (e) => { e.stopPropagation(); setMobileSearchState(false); });
     
-    allDom.mobileSearchBtn.addEventListener('click', (e) => {
+    // --- Color Theme Button Listeners (THE FIX IS HERE) ---
+    allDom.colorThemeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        setMobileSearchState(true);
+        allDom.colorOptions.classList.toggle('hidden');
+    });
+    allDom.colorOptions.addEventListener('click', (e) => {
+        const button = e.target.closest('button[data-theme]');
+        if (button) {
+            applyColorTheme(button.dataset.theme);
+            // No need to hide here, the global listener will do it.
+        }
     });
 
-    allDom.mobileRoomBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        setMobileSearchState(false);
-    });
-    
-    // Final Global Click Listener
-    document.addEventListener('click', (e) => {
-        // If the click was NOT inside the color options dropdown, hide it.
-        // The e.stopPropagation() in the button's listener prevents this from firing when you click the button itself.
-        if (!allDom.colorOptions.contains(e.target) && !allDom.colorThemeBtn.contains(e.target)) {
-            allDom.colorOptions.classList.add('hidden');
-        }
-        
-        // Logic for other menus
-        if (!allDom.mobileSortBtn.contains(e.target)) {
-            allDom.sortMenuMobile.classList.add('hidden');
-        }
-        
-        if (isMobileSearchActive && !e.target.closest('#mobile-controls-container')) {
-            setMobileSearchState(false);
-        }
-    });
-    
-    // NEW Lightbox controls
+    // --- Lightbox Listeners ---
     allDom.lightboxClose.addEventListener('click', closeLightbox);
-    allDom.lightboxContent.addEventListener('click', (e) => {
-        // Only close if the click is on the wrapper itself, not the media inside it.
-        if (e.target === allDom.lightboxContent) {
-            closeLightbox();
-        }
-    });
+    allDom.lightboxContent.addEventListener('click', (e) => { if (e.target === allDom.lightboxContent) { closeLightbox(); }});
     allDom.lightboxPrev.addEventListener('click', () => changeLightboxMedia(-1));
     allDom.lightboxNext.addEventListener('click', () => changeLightboxMedia(1));
     document.addEventListener('keydown', (e) => {
@@ -360,6 +342,22 @@ function setupEventListeners() {
         if (e.key === 'Escape') closeLightbox();
         if (e.key === 'ArrowLeft') changeLightboxMedia(-1);
         if (e.key === 'ArrowRight') changeLightboxMedia(1);
+    });
+
+    // --- Final Global Click Listener to Close Menus ---
+    document.addEventListener('click', (e) => {
+        // Hide color options if click is outside the button AND the menu
+        if (!allDom.colorThemeBtn.contains(e.target) && !allDom.colorOptions.contains(e.target)) {
+            allDom.colorOptions.classList.add('hidden');
+        }
+        // Hide mobile sort menu if click is outside the button
+        if (!allDom.mobileSortBtn.contains(e.target) && !allDom.sortMenuMobile.contains(e.target)) {
+            allDom.sortMenuMobile.classList.add('hidden');
+        }
+        // Hide mobile search if click is outside the main controls container
+        if (isMobileSearchActive && !e.target.closest('#mobile-controls-container')) {
+            setMobileSearchState(false);
+        }
     });
 }
 
