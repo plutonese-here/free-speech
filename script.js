@@ -535,15 +535,23 @@ function createPostElement(post) {
                 const datasetAttributes = `data-post-id="${post.id}" data-media-index="${index}"`;
                 
                 let thumbnailHtml;
+                let overlayHtml = '';
                 if (file.type.startsWith('image/')) {
                     thumbnailHtml = `<img src="${file.url}" alt="Post thumbnail" class="w-full h-full object-cover">`;
                 } else { // It's a video
                     // Use #t=0.1 to show the first frame as a thumbnail
                     thumbnailHtml = `<video muted playsinline preload="metadata" src="${file.url}#t=0.1" class="w-full h-full object-cover"></video>`;
+                    // If it's a video, add the play button overlay
+                    overlayHtml = `<div class="play-icon-overlay">
+                                    <svg fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                                    </svg>
+                                </div>`;
                 }
                 
                 // Each item is a clickable div that can open the lightbox
-                return `<div class="thumbnail-item open-lightbox" ${datasetAttributes}>${thumbnailHtml}</div>`;
+                // Now we include the overlayHtml inside it
+                return `<div class="thumbnail-item open-lightbox" ${datasetAttributes}>${thumbnailHtml}${overlayHtml}</div>`;
             }).join('');
             
             mediaGridHtml = `<div class="thumbnail-grid mt-4">${mediaThumbnails}</div>`;
