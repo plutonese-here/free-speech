@@ -329,12 +329,17 @@ function setupEventListeners() {
     
     // Final Global Click Listener
     document.addEventListener('click', (e) => {
-        if (!allDom.colorThemeBtn.contains(e.target) && !allDom.colorOptions.contains(e.target)) {
+        // If the click was NOT inside the color options dropdown, hide it.
+        // The e.stopPropagation() in the button's listener prevents this from firing when you click the button itself.
+        if (!allDom.colorOptions.contains(e.target) && !allDom.colorThemeBtn.contains(e.target)) {
             allDom.colorOptions.classList.add('hidden');
         }
-        if (!allDom.mobileSortBtn.contains(e.target) && !allDom.sortMenuMobile.contains(e.target)) {
+        
+        // Logic for other menus
+        if (!allDom.mobileSortBtn.contains(e.target)) {
             allDom.sortMenuMobile.classList.add('hidden');
         }
+        
         if (isMobileSearchActive && !e.target.closest('#mobile-controls-container')) {
             setMobileSearchState(false);
         }
