@@ -576,7 +576,7 @@ function createPostElement(post) {
                 <div class="flex-shrink-0 w-10 h-10 text-primary">${postUser.icon}</div>
                 <div class="flex-grow">
                     <div class="flex items-center justify-between"><div class="flex items-center flex-wrap gap-x-2 text-sm"><span class="font-bold">${postUser.name}</span><span class="text-[var(--icon-color)]">·</span><span class="text-[var(--icon-color)]">${timeAgo}</span>${categoryInfo ? `<span class="text-[var(--icon-color)]">·</span> <a href="#" class="text-primary font-semibold board-link" data-catid="${categoryInfo.id}">${categoryInfo.name}</a>` : ''}</div></div>
-                    // This new block replaces the old <p> tag
+                    <!-- This new block replaces the old <p> tag -->
                     <div class="post-content-wrapper mt-1">
                         ${
                             post.content && post.content.length > 400
